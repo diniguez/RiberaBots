@@ -54,3 +54,6 @@ sudo nano /etc/hosts
 edit the line that says 192.168.xxx.xxx to be the one of your laptop pc (obtained with ifconfig and hostname commands)
 for example, mine is:
 10.74.153.99    david-aorus
+
+next step is to find the right ROS software repository from http://packages.ros.org/ros/ubuntu/dists/?C=M;O=A as they have been discontinued by organization https://wiki.ros.org/noetic/Planning/Maintenance:
+The last ROS 1 release Noetic will go end of life on May 31st with that the ROS Wiki (this website) will also be EOL and transition to being an archive. Maintainers:Please migrate any wiki content into your package's README.md file. If you need more help on migrating code please see this migration guide. Or watch Shane's Lightning Talk from ROSCon 2024(https://vimeo.com/1026038503?share=copy#t=392.022).
