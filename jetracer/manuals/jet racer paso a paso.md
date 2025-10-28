@@ -55,7 +55,12 @@ edit the line that says 192.168.xxx.xxx to be the one of your laptop pc (obtaine
 for example, mine is:
 10.74.153.99    david-aorus
 
-next step:
+Install VMWare Workstation PRO
+Run VM Ubuntu Jetracer 18.04
+
+
+---
+Optional step:
 https://www.waveshare.com/wiki/JetRacer_ROS_AI_Kit_Advanced_Tutorial_VI:_Install_ROS_System_in_Ubuntu_Virtual_Machine_%26_Environment_Configuration#:~:text=by%20VMware%20software.-,Step%201%3A%20Configure%20ROS%20Software%20Repository,-After%20installing%20the
 
  is to find the right ROS software repository from http://packages.ros.org/ros/ubuntu/dists/?C=M;O=A as they have been discontinued by organization https://wiki.ros.org/noetic/Planning/Maintenance:
