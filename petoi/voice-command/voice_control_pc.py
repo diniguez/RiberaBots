@@ -60,7 +60,7 @@ COMANDOS = {
     "atrás": "kwkB",
     "izquierda": "kwkL",
     "derecha": "kwkR",
-    "sentado": "ksit",          # si este os funciona
+    "sentado": "ksit",          # estos funcionan
     "sientate": "ksit",
     "siéntate": "ksit",
 
