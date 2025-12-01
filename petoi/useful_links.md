@@ -1,0 +1,3 @@
+https://docs.petoi.com/~gitbook/image?url=https%3A%2F%2F1565080149-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MQ6a951Q6Jn1Zzt5Ajr-887967055%252Fuploads%252F3XodRcaq7Wu56PS4YGYa%252FskillList.png%3Falt%3Dmedia%26token%3D33409306-3e23-420c-bdf2-f28c6065129a&width=768&dpr=4&quality=100&sign=c0119df0&sv=2
+
+https://docs.petoi.com/apis/serial-protocol#arduino-ide-as-an-interface

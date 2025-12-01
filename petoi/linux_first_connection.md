@@ -1,8 +1,13 @@
-cd $folderOfPetoi
+# open a terminal / console
+mkdir petoi 
+cd petoi
+
+su ribera
 
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update
 sudo apt install python3.10 python3.10-venv python3.10-distutils
+sudo apt install curl
 curl -sS https://bootstrap.pypa.io/get-pip.py | sudo /usr/bin/python3.10
 
 # install vosk spanish model
@@ -32,3 +37,4 @@ source .venv/bin/activate
 
 # run the code
 python3.10 voice_control_pc.py
+python3.10 manual_control_pc.py

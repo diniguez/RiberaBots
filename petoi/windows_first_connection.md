@@ -1,38 +1,71 @@
-# Petoi Bittle — Steps for Windows and COM Port Connection
+# WSL
+## from a terminal, run wsl
+wsl --install
 
-1. Hardware checklist
-    - Petoi Bittle, USB cable (use data-capable cable), battery (charged), PC with Windows.
+wsl --install ubuntu
 
-2. Install USB-to-serial driver
-    - Bittle may use CH340/CP210x/FTDI/STM drivers. If Windows does not auto-install, download the matching driver from the chip vendor (CH340/CP210x/FTDI/STM) and install.
+# create our user and remmember password
 
-3. Get Petoi firmware and tools
-https://docs.petoi.com/desktop-app/tools
+# in windows app, install driver for usb:
+https://github.com/dorssel/usbipd-win/releases/download/v5.3.0/usbipd-win_5.3.0_x64.msi
 
-4. Connect Bittle to PC
-    - Connect the usb module to Bittle's NyBoard(main board).
-    - Plug the battery into the Bittle.
-    - Plug the USB cable from PC to Bittle’s USB port.
+# in Powershell
+wsl --version
+# verify version is >= 2.0
 
-Optionals:
-7. Configure Arduino IDE (or PlatformIO)
-    - In Arduino IDE: Tools → Board → select the board indicated by Petoi docs (or the matching MCU).
-    - Tools → Port → select the COMn from Device Manager.
-    - Tools → Processor/Upload Speed: follow Petoi repo instructions (115200 or as documented).
+usbipd list
+# choose the busid of one USB where we will connect Petoi
+usbipd bind --busid 1-4
+usbipd attach --wsl --busid 1-4
 
-8. Open and set up the firmware
-    - Open the example/main sketch from the downloaded Petoi repo.
-    - Edit any configuration constants if required (model, servo counts, initial calibration) following repo README.
+# in wsl, create a folder for our project
+cd
+mkdir petoi
+cd petoi
 
-9. Upload firmware
-    - Press Upload in the IDE. If the board requires a manual reset/boot mode, follow the repository’s step (press reset button just before or during upload).
-    - Wait until the IDE reports “Done uploading.” Resolve compile errors by installing missing libraries indicated by the IDE.
+# open your local folder of Petoi from Windows Explorer
+\\wsl$\Ubuntu\home\vespertino\petoi
+# copy there the python files of the project (using mouse and copy&paste commands)
 
 
-Quick troubleshooting tips
-- If upload fails: try a different USB cable or port, reinstall driver, or reboot PC.
-- If no COM port shows: check Device Manager for unknown devices and re-install appropriate driver.
-- If servos don’t move after upload: ensure external battery is connected and powered (USB may not supply servo current).
+# install Python and libraries
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt update
+sudo apt install -y pciutils build-essential libsndfile1-dev 
+sudo apt install -y python3.10 python3.10-venv python3.10-distutils python3.10-dev
+sudo apt install curl
+curl -sS https://bootstrap.pypa.io/get-pip.py | sudo /usr/bin/python3.10
 
-References
-- Follow the repository README for board-specific settings, libraries, and calibration steps.
+# create and work into the virtual environment
+python3.10 -m venv .venv
+source .venv/bin/activate
+
+# add libraries
+pip install pyserial
+
+# give access to the Petoi connection port usb, exactly to the /dev/ttyACM0
+sudo usermod -a -G dialout vespertino
+sudo chmod +777 /dev/ttyACM0
+
+# run the code
+python3.10 manual_control_pc.py
+
+
+# #OPTIONALS# #####################################################################################
+# install vosk spanish model
+mkdir -p my_vosk/models
+cd my_vosk/models
+wget https://alphacephei.com/vosk/models/vosk-model-small-es-0.42.zip
+unzip vosk-model-small-es-0.42.zip
+rm vosk-model-small-es-0.42.zip
+
+# install Python headers, PortAudio dev headers and build tools
+sudo apt install -y portaudio19-dev libportaudio2
+pip install vosk sounddevice soundfile
+
+# restart user session
+cd $folderOfPetoi
+source .venv/bin/activate
+
+# run the code
+python3.10 voice_control_pc.py
