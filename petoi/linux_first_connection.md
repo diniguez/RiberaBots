@@ -49,6 +49,8 @@ python3.10 manual_control_pc.py
 ## OPTIONAL
 # # ###############################################################################################
 # install vosk spanish model
+cd
+cd petoi
 mkdir -p my_vosk/models
 cd my_vosk/models
 wget https://alphacephei.com/vosk/models/vosk-model-small-es-0.42.zip
