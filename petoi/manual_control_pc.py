@@ -21,6 +21,15 @@ def enviar(cmd):
     print(f"→ Enviado al robot: {cmd}")
 
 
+# -------- EJECUTAR EL COMANDO INTRODUCIDO EN EL TERMINAL -----
+if sys.argv[1]:
+    enviar(sys.argv[1])
+else:
+    enviar("ksit")
+
+ser.close()
+
+
 # -------- TABLA DE COMANDOS -----
 COMANDOS = {
     "adelante": "kwkF",
@@ -40,11 +49,3 @@ COMANDOS = {
     "levántate": "stand",
     "quieto": "balance"
 }
-
-# -------- EJECUTAR EL COMANDO INTRODUCIDO EN EL TERMINAL -----
-if sys.argv[1]:
-    enviar(sys.argv[1])
-else:
-    enviar("ksit")
-
-ser.close()
