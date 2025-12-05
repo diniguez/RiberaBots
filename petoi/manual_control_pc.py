@@ -41,10 +41,10 @@ COMANDOS = {
     "quieto": "balance"
 }
 
-# -------- EJECUTAR EL COMANDO DE PRUEBA -----
-#enviar("ksit");
-
 # -------- EJECUTAR EL COMANDO INTRODUCIDO EN EL TERMINAL -----
-enviar(sys.argv[1]);
+if sys.argv[1]:
+    enviar(sys.argv[1])
+else:
+    enviar("ksit")
 
 ser.close()
