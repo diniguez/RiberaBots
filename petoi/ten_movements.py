@@ -17,16 +17,23 @@ print("✔ Robot conectado por USB.\n")
 # -------- ENVIAR COMANDO -------
 def enviar(cmd):
     ser.write((cmd + "\n").encode())
-    print(f"→ Enviado al robot: {cmd}")
+    print(f"→ Enviado al robot: {cmd} \n")
+    time.sleep(5)
 
 
-# -------- EJECUTAR EL COMANDO INTRODUCIDO EN EL TERMINAL -----
-if len(sys.argv) > 1:
-    enviar(sys.argv[1])
-else:
-    print(f"→ Enviado al robot un movimiento por defecto")
-    enviar("kup")
+# -------- CONJUNTO DE DIEZ MOVIMIENTOS POR DEFECTO -------
+def diez_movimientos():
+    for indice in range(10):
+        print(f"paso {indice}")
+        enviar("khsk")
 
+# -------- EJECUTAR UN MOVIMIENTO POR DEFECTO -----
+enviar("kup")
+
+# -------- EJECUTAR MOVIMIENTOS PROGRAMADOS -----
+diez_movimientos()
+
+# -------- CERRAR COMUNICACION CON ROBOT -----
 ser.close()
 
 
