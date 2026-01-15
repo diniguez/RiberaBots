@@ -8,16 +8,17 @@
 
 Connect to same wifi as laptop pc.
 
-Obtain ip address from jetson lcd screen, annotate it (10.74.153.182)
+Obtain ip address from jetson lcd screen, annotate it (10.249.73.33)
 
 Use that ip address to connect through wifi using ssh:
-ssh jetson@10.74.153.182
+ssh jetson@10.249.73.33
 
 # NOW YOU ARE ON THE ROBOT SYSTEM
 
 hostname to obtain of the virtual machine
 nano-4gb-jp451
 
+# OPEN OTHER TERMINAL IN YOUR COMPUTER
 # become sudoer
 su ribera
 
@@ -34,7 +35,7 @@ export ROS_HOSTNAME=nano-4gb-jp451
 # otherwise, add them, save the file and execute:
 source ~/.bashrc
 
-# In your ubuntu laptop do:
+# IN YOUR UBUNTU MACHINE DO:
 ifconfig       #Get the IP address of the virtual machine
 hostname       #Get the hostname of the virtual machine
 
@@ -66,8 +67,19 @@ Run VM Ubuntu Jetracer 18.04
 
 
 ---
-Optional step:
+# Optional step:
 https://www.waveshare.com/wiki/JetRacer_ROS_AI_Kit_Advanced_Tutorial_VI:_Install_ROS_System_in_Ubuntu_Virtual_Machine_%26_Environment_Configuration#:~:text=by%20VMware%20software.-,Step%201%3A%20Configure%20ROS%20Software%20Repository,-After%20installing%20the
 
  is to find the right ROS software repository from http://packages.ros.org/ros/ubuntu/dists/?C=M;O=A as they have been discontinued by organization https://wiki.ros.org/noetic/Planning/Maintenance:
 The last ROS 1 release Noetic will go end of life on May 31st with that the ROS Wiki (this website) will also be EOL and transition to being an archive. Maintainers:Please migrate any wiki content into your package's README.md file. If you need more help on migrating code please see this migration guide. Or watch Shane's Lightning Talk from ROSCon 2024(https://vimeo.com/1026038503?share=copy#t=392.022).
+
+
+## Optional environent set up:
+su ribera
+usermod -aG sudo vespertino
+
+groups vespertino
+visudo 
+# if visudo is not available, run: sudo apt install sudo
+
+nano /etc/sudoers
