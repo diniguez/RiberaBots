@@ -1,3 +1,10 @@
+# Install VMWare on Linux:
+# get the file VMware-Workstation-Full-17.6.4-24832109.x86_64.bundle
+# give execution permission
+chmod +777 VMware-Workstation-Full-17.6.4-24832109.x86_64.bundle 
+# run the installer
+sudo ./VMware-Workstation-Full-17.6.4-24832109.x86_64.bundle 
+
 # After completing the hardware building, connect to the power supply.
 
 # Connect HDMI cable, then usb keyboard and mouse.
