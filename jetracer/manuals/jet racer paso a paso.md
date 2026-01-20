@@ -90,3 +90,12 @@ visudo
 # if visudo is not available, run: sudo apt install sudo
 
 nano /etc/sudoers
+
+
+
+# In the robot system (through SSH)
+roscore
+
+
+# In the VM console (not SSH):
+roslaunch jetracer keyboard.launch
