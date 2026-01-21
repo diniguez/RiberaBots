@@ -95,7 +95,15 @@ nano /etc/sudoers
 
 # In the robot system (through SSH)
 roscore
-
+roslaunch jetracer jetracer.launch
+## TEST connection: start the listener
+rosrun rospy_tutorials listener
 
 # In the VM console (not SSH):
+rostopic list
+## TEST connection: start the talker
+rosrun rospy_tutorials talker
+
+## drive the car by keyboard
 roslaunch jetracer keyboard.launch
+
