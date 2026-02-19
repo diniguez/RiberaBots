@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+## previous to this, you should run in another terminal:
+## roslaunch jetracer lidar.launch
+##
+
 import serial, time, random
 import rospy
 from sensor_msgs.msg import LaserScan
