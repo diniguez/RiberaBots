@@ -26,6 +26,8 @@ sudo apt install -y python3.10-dev build-essential
 # install serial ports communication
 pip install pyserial
 
+
+### CONNECT BY USB CABLE ### Serial connection
 # this two last commands gives access to the Petoi connection port usb, exactly to the /dev/ttyACM0
 sudo usermod -a -G dialout vespertino
 sudo chmod +777 /dev/ttyACM0
@@ -44,6 +46,18 @@ cd petoi
 # run the code
 python3.10 manual_control_pc.py
 
+
+### CONNECT BY BLUETOOTH (no BLE) ############
+bluetoothctl
+disconnect 54:37:45:9A:9A:E1
+connect 54:37:45:9A:9A:E1
+quit
+
+sudo rfcomm bind /dev/rfcomm0 54:37:45:9A:9A:E1
+#sudo rfcomm bind /dev/rfcomm0 54:37:45:9A:9A:63
+
+### extra tests for BT ##########
+sdptool browse 54:37:45:9A:9A:E1
 
 # # ###############################################################################################
 ## OPTIONAL
