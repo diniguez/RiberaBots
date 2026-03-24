@@ -1,3 +1,7 @@
+'''
+    This works only for Bluetooth standard, not for BLE (Bluetooht Low Energy)
+'''
+
 import serial
 import sys
 import time
