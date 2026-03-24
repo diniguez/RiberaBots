@@ -8,9 +8,7 @@ bateria = tello.get_battery()
 print(f"Nivel de batería: {bateria}%")
 
 tello.takeoff()
-time.sleep(2)
 
 tello.flip_forward()
-time.sleep(2)
 
 tello.land()
