@@ -27,6 +27,16 @@ sudo apt install -y python3.10-dev build-essential
 pip install pyserial
 
 
+### CONNECT BY BLE (BLUETOOTH LOW ENERGY) ############
+bluetoothctl
+scan on
+# if PetoiBLE appears, you can run test_ble.py
+# otherwise, restart BT from Ubuntu and repeat
+sudo systemctl restart bluetooth
+
+# modify MAC ADDRESS into code variable ADDRESS
+
+
 ### CONNECT BY USB CABLE ### Serial connection
 # this two last commands gives access to the Petoi connection port usb, exactly to the /dev/ttyACM0
 sudo usermod -a -G dialout vespertino
@@ -45,7 +55,6 @@ cd petoi
 
 # run the code
 python3.10 manual_control_pc.py
-
 
 ### CONNECT BY BLUETOOTH (no BLE) ############
 bluetoothctl

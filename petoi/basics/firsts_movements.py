@@ -3,35 +3,34 @@ import sys
 import asyncio
 from bleak import BleakScanner, BleakClient
 
-DEVICE_NAME = "PetoiBLE"
+ADDRESS = "54:37:45:9A:9A:E1"
 CHAR_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
 async def main():
     
     comandos = [
+        b'kpee\n',
+        b'kck\n',
+        b'khi\n',
+        b'kvtF\n',
         b'ksit\n',
-        b'kstand\n',
+        ]
+    
+    comandos_validados = [
+        b'kpee\n',
+        b'kck\n',
+        b'khi\n',
+        b'kvtF\n',
+        b'kwkF\n',
+        b'kwkL\n',
+        b'ksit\n',
         b'kup\n'
         ]
 
-    print("Buscando PetoiBLE...")
 
-    devices = await BleakScanner.discover()
-    target = None
+    print(f"Conectando a {ADDRESS}...")
 
-    for d in devices:
-        print(f"Encontrado: {d.name} [{d.address}]")
-        if d.name and DEVICE_NAME in d.name:
-            target = d
-            break
-
-    if not target:
-        print("No se encontró Bittle 😢")
-        return
-
-    print(f"Conectando a {target.address}...")
-
-    async with BleakClient(target.address) as client:
+    async with BleakClient(ADDRESS) as client:
         print("Conectado 🐾")
         ## (Opcional) escuchar respuestas
         #def notification_handler(sender, data):
