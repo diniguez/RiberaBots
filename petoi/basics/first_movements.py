@@ -3,19 +3,17 @@ import sys
 import asyncio
 from bleak import BleakScanner, BleakClient
 
-ADDRESS = "54:37:45:9A:9A:E1"
+#ADDRESS = "54:37:45:9A:9A:E1"
+ADDRESS = "31:02:00:01:36:3D" 
 CHAR_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
 async def main():
     
     comandos = [
-        b'kpee\n',
-        b'kck\n',
-        b'khi\n',
-        b'kvtF\n',
-        b'ksit\n',
+        b'kup\n',
+        b'kbflip\n'        
         ]
-    
+
     comandos_validados = [
         b'kpee\n',
         b'kck\n',
@@ -24,9 +22,13 @@ async def main():
         b'kwkF\n',
         b'kwkL\n',
         b'ksit\n',
-        b'kup\n'
+        b'kup\n',
+        b'kstand\n'
         ]
 
+    comandos_no_validos = [
+        b'kflip\n'
+        ]
 
     print(f"Conectando a {ADDRESS}...")
 
@@ -40,7 +42,7 @@ async def main():
 
         # construimos un conjunto de comandos para probar
         for cmd in comandos:
-            await asyncio.sleep(5)
+            await asyncio.sleep(2)
             print("Probando:", cmd)
             # Enviar comando
             await client.write_gatt_char(CHAR_UUID, cmd)
