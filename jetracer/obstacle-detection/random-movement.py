@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 ## previous to this, you should run in another terminal:
+## roscore
+## and in another terminal more:
 ## roslaunch jetracer lidar.launch
 ##
 
