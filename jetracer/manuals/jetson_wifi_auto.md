@@ -4,7 +4,7 @@ sudo nmcli connection modify MerIA connection.permissions ""
 
 sudo nano /etc/gdm3/custom.conf
 Encontrar las líneas # AutomaticLoginEnable = true and # AutomaticLogin = user1.
-# Descomentar las líneas (quitar el #):
+# Descomentar las líneas (quitar el #) y añadir "jetson" al nombre del autologin:
 AutomaticLoginEnable = true
 AutomaticLogin = jetson
 
