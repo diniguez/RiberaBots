@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚁 Control del Dron</title>
+
+  <!-- Fuentes infantiles y divertidas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Variables ────────────────────────────────────────────────────── */
+    :root {
+      --sky:        #a8e6ff;
+      --sky-dark:   #6dd0f5;
+      --cloud:      #ffffff;
+      --yellow:     #ffe94d;
+      --orange:     #ff9f1c;
+      --green:      #5ce65c;
+      --green-dark: #33b233;
+      --red:        #ff4f5e;
+      --red-dark:   #cc2233;
+      --purple:     #c278f5;
+      --purple-dark:#9b44d6;
+      --blue:       #4da6ff;
+      --blue-dark:  #1a7ae0;
+      --teal:       #00d4b0;
+      --teal-dark:  #009e84;
+      --shadow:     rgba(0,0,0,.18);
+      --font-main:  'Fredoka One', cursive;
+      --font-body:  'Nunito', sans-serif;
+
+      /* Resolución efectiva del kiosco: 2160/2 × 3840/2 = 1080 × 1920 px */
+      --base: 1px;
+    }
+
+    /* ── Reset & base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: var(--sky);
+      font-family: var(--font-body);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* ── Fondo animado con nubes y sol ────────────────────────────────── */
+    .sky-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #b5eaff 0%, #e0f7ff 55%, #c8f0d0 100%);
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    /* Sol */
+    .sun {
+      position: absolute;
+      top: 60px;
+      right: 90px;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, #fff176 30%, #ffe94d 60%, #ffb800 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 60px 20px #ffe94d88, 0 0 120px 40px #ffd00044;
+      animation: pulse-sun 3s ease-in-out infinite;
+    }
+    @keyframes pulse-sun {
+      0%,100% { transform: scale(1);   box-shadow: 0 0 60px 20px #ffe94d88, 0 0 120px 40px #ffd00044; }
+      50%      { transform: scale(1.06); box-shadow: 0 0 80px 30px #ffe94daa, 0 0 160px 60px #ffd00066; }
+    }
+
+    /* Rayos del sol */
+    .sun-rays {
+      position: absolute;
+      inset: -30px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(
+        #ffe94d55 0deg 10deg, transparent 10deg 30deg
+      );
+      animation: spin-slow 12s linear infinite;
+    }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+    /* Nubes */
+    .cloud {
+      position: absolute;
+      background: #fff;
+      border-radius: 999px;
+      opacity: .85;
+      filter: blur(2px);
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+    }
+
+    .c1 { width:220px; height:70px; top:120px; left:-60px;
+          animation: drift 18s linear infinite; }
+    .c1::before { width:110px; height:110px; top:-55px; left:30px; }
+    .c1::after  { width:80px;  height:80px;  top:-40px; left:100px; }
+
+    .c2 { width:180px; height:55px; top:260px; left:-40px;
+          animation: drift 24s linear infinite 4s; }
+    .c2::before { width:90px; height:90px; top:-45px; left:20px; }
+    .c2::after  { width:70px; height:70px; top:-35px; left:85px; }
+
+    .c3 { width:260px; height:75px; top:180px; right:-80px;
+          animation: drift-rev 20s linear infinite 2s; }
+    .c3::before { width:120px; height:120px; top:-60px; left:35px; }
+    .c3::after  { width:90px;  height:90px;  top:-45px; left:130px; }
+
+    @keyframes drift     { from { transform: translateX(0); } to { transform: translateX(1200px); } }
+    @keyframes drift-rev { from { transform: translateX(0); } to { transform: translateX(-1200px); } }
+
+    /* Hierba inferior */
+    .grass {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 110px;
+      background: linear-gradient(180deg, #6ddc6d 0%, #3bb53b 100%);
+      border-radius: 60% 60% 0 0 / 30% 30% 0 0;
+    }
+    .grass::before {
+      content: '';
+      position: absolute;
+      top: -24px; left: -20px; right: -20px;
+      height: 50px;
+      background: radial-gradient(ellipse at 50% 100%, #7de87d 60%, transparent 100%);
+    }
+
+    /* ── Contenedor principal ─────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      width: 1080px;
+      height: 1920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Cabecera ─────────────────────────────────────────────────────── */
+    .header {
+      margin-top: 80px;
+      text-align: center;
+    }
+    .header h1 {
+      font-family: var(--font-main);
+      font-size: 88px;
+      color: #1a3a6b;
+      text-shadow:
+        6px 6px 0 #ffffff,
+        10px 10px 0 #4da6ff55;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+    .header .subtitle {
+      font-size: 38px;
+      font-weight: 900;
+      color: #2255aa;
+      margin-top: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* ── Dron animado ─────────────────────────────────────────────────── */
+    .drone-zone {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 260px;
+    }
+    .drone-svg {
+      animation: hover-drone 2.4s ease-in-out infinite;
+      filter: drop-shadow(0 20px 30px rgba(0,0,0,.22));
+    }
+    @keyframes hover-drone {
+      0%,100% { transform: translateY(0)   rotate(-2deg); }
+      50%      { transform: translateY(-22px) rotate(2deg); }
+    }
+
+    /* ── Estado / mensaje de feedback ────────────────────────────────── */
+    .status-bar {
+      margin-top: 20px;
+      background: #ffffffcc;
+      border: 4px solid #4da6ff;
+      border-radius: 60px;
+      padding: 22px 60px;
+      font-size: 42px;
+      font-weight: 900;
+      color: #1a3a6b;
+      font-family: var(--font-main);
+      letter-spacing: 1px;
+      min-width: 700px;
+      text-align: center;
+      box-shadow: 0 8px 30px #4da6ff44;
+      transition: background .3s, color .3s;
+    }
+    .status-bar.ok    { background: #d4ffd4cc; border-color: var(--green-dark); color: #1a5c1a; }
+    .status-bar.error { background: #ffd4d4cc; border-color: var(--red-dark);   color: #5c1a1a; }
+    .status-bar.wait  { background: #fff8d4cc; border-color: var(--orange);     color: #5c3a00; }
+
+    /* ── Cuadrícula de botones ────────────────────────────────────────── */
+    .btn-grid {
+      margin-top: 60px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 40px;
+      padding: 0 60px;
+      width: 100%;
+    }
+
+    /* ── Botón base ───────────────────────────────────────────────────── */
+    .btn {
+      position: relative;
+      border: none;
+      border-radius: 48px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 40px 20px 44px;
+      font-family: var(--font-main);
+      font-size: 52px;
+      color: #fff;
+      letter-spacing: 1px;
+      text-shadow: 0 3px 8px rgba(0,0,0,.28);
+      transition:
+        transform .12s cubic-bezier(.34,1.56,.64,1),
+        filter .12s;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      overflow: hidden;
+    }
+    /* Brillo interno */
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 8px; left: 12%; right: 12%;
+      height: 38%;
+      background: linear-gradient(180deg, rgba(255,255,255,.45) 0%, transparent 100%);
+      border-radius: 999px;
+      pointer-events: none;
+    }
+    /* Borde inferior para efecto 3D */
+    .btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 12px;
+      border-radius: 0 0 48px 48px;
+      background: rgba(0,0,0,.18);
+      pointer-events: none;
+    }
+
+    .btn:active {
+      transform: scale(.93) translateY(5px);
+      filter: brightness(.88);
+    }
+
+    /* Colores individuales */
+    .btn-takeoff  {
+      background: linear-gradient(145deg, #5ce65c, #33cc33);
+      box-shadow: 0 12px 0 var(--green-dark), 0 18px 40px #33cc3366;
+    }
+    .btn-land     {
+      background: linear-gradient(145deg, #ff4f5e, #e0192b);
+      box-shadow: 0 12px 0 var(--red-dark), 0 18px 40px #e0192b66;
+    }
+    .btn-forward  {
+      background: linear-gradient(145deg, #4da6ff, #1a7ae0);
+      box-shadow: 0 12px 0 var(--blue-dark), 0 18px 40px #1a7ae066;
+      grid-column: 1 / -1;   /* ocupa las dos columnas */
+    }
+    .btn-left     {
+      background: linear-gradient(145deg, #c278f5, #9b44d6);
+      box-shadow: 0 12px 0 var(--purple-dark), 0 18px 40px #9b44d666;
+    }
+    .btn-right    {
+      background: linear-gradient(145deg, #00d4b0, #009e84);
+      box-shadow: 0 12px 0 var(--teal-dark), 0 18px 40px #009e8466;
+    }
+
+    /* Icono SVG inline */
+    .btn-icon {
+      width: 110px;
+      height: 110px;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    /* Etiqueta del botón */
+    .btn-label {
+      line-height: 1;
+    }
+
+    /* ── Pie de página ────────────────────────────────────────────────── */
+    .footer {
+      position: absolute;
+      bottom: 130px;
+      font-size: 30px;
+      font-weight: 700;
+      color: #1a5c1a;
+      letter-spacing: .5px;
+      text-align: center;
+    }
+
+    /* ── Capa de bloqueo durante espera ──────────────────────────────── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: transparent;
+      cursor: wait;
+    }
+    .overlay.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ── Fondo ─────────────────────────────────────────────────────────────── -->
+<div class="sky-bg">
+  <div class="sun"><div class="sun-rays"></div></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="grass"></div>
+</div>
+
+<!-- ── Capa de bloqueo ───────────────────────────────────────────────────── -->
+<div class="overlay" id="overlay"></div>
+
+<!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+<div class="wrapper">
+
+  <!-- Título -->
+  <div class="header">
+    <h1>🚁 ¡Control del Dron!</h1>
+    <p class="subtitle">Toca un botón para mover el dron</p>
+  </div>
+
+  <!-- Dron SVG animado -->
+  <div class="drone-zone">
+    <svg class="drone-svg" viewBox="0 0 320 220" width="320" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hélices -->
+      <ellipse cx="52"  cy="68" rx="46" ry="12" fill="#cce8ff" opacity=".75"/>
+      <ellipse cx="268" cy="68" rx="46" ry="12" fill="#cce8ff" opacity=".75"/>
+      <ellipse cx="52"  cy="152" rx="46" ry="12" fill="#cce8ff" opacity=".75"/>
+      <ellipse cx="268" cy="152" rx="46" ry="12" fill="#cce8ff" opacity=".75"/>
+      <!-- Brazos -->
+      <line x1="80"  y1="90"  x2="140" y2="108" stroke="#aaa" stroke-width="10" stroke-linecap="round"/>
+      <line x1="240" y1="90"  x2="180" y2="108" stroke="#aaa" stroke-width="10" stroke-linecap="round"/>
+      <line x1="80"  y1="130" x2="140" y2="112" stroke="#aaa" stroke-width="10" stroke-linecap="round"/>
+      <line x1="240" y1="130" x2="180" y2="112" stroke="#aaa" stroke-width="10" stroke-linecap="round"/>
+      <!-- Cuerpo -->
+      <rect x="120" y="90" width="80" height="40" rx="16" fill="#1a7ae0"/>
+      <rect x="130" y="96" width="60" height="28" rx="10" fill="#4da6ff"/>
+      <!-- Ojo / cámara -->
+      <circle cx="160" cy="138" r="14" fill="#222"/>
+      <circle cx="160" cy="138" r="8"  fill="#111"/>
+      <circle cx="163" cy="135" r="3"  fill="#fff" opacity=".7"/>
+      <!-- Motores -->
+      <circle cx="52"  cy="68"  r="14" fill="#ff9f1c"/>
+      <circle cx="268" cy="68"  r="14" fill="#ff9f1c"/>
+      <circle cx="52"  cy="152" r="14" fill="#ff9f1c"/>
+      <circle cx="268" cy="152" r="14" fill="#ff9f1c"/>
+      <!-- LED verde parpadeante -->
+      <circle cx="160" cy="88" r="6" fill="#5ce65c" opacity=".9">
+        <animate attributeName="opacity" values="0.9;0.2;0.9" dur="1.4s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+
+  <!-- Barra de estado -->
+  <div class="status-bar" id="status">✅ Listo para volar</div>
+
+  <!-- Botones -->
+  <div class="btn-grid">
+
+    <!-- DESPEGAR -->
+    <button class="btn btn-takeoff" id="btn-takeoff" onclick="sendCmd('takeoff','Despegando… 🚀','✅ ¡Dron en el aire!','❌ Error al despegar')">
+      <!-- Icono: cohete / flecha arriba con alas -->
+      <svg class="btn-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.18)"/>
+        <!-- cohete -->
+        <ellipse cx="50" cy="32" rx="14" ry="22" fill="#fff"/>
+        <polygon points="36,44 50,54 64,44" fill="#ffe94d"/>
+        <rect x="40" y="52" width="20" height="18" rx="5" fill="#fff"/>
+        <!-- llama -->
+        <ellipse cx="50" cy="74" rx="8" ry="12" fill="#ff9f1c" opacity=".9"/>
+        <ellipse cx="50" cy="76" rx="5" ry="8"  fill="#ffe94d"/>
+        <!-- ventana -->
+        <circle cx="50" cy="30" r="6" fill="#a8e6ff"/>
+      </svg>
+      <span class="btn-label">Despegar</span>
+    </button>
+
+    <!-- ATERRIZAR -->
+    <button class="btn btn-land" id="btn-land" onclick="sendCmd('land','Aterrizando… 🛬','✅ ¡Dron en tierra!','❌ Error al aterrizar')">
+      <svg class="btn-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.18)"/>
+        <!-- avión aterrizando -->
+        <ellipse cx="50" cy="38" rx="14" ry="20" fill="#fff"/>
+        <polygon points="36,52 50,46 64,52" fill="#ffe94d"/>
+        <rect x="40" y="44" width="20" height="18" rx="5" fill="#fff"/>
+        <!-- ventana -->
+        <circle cx="50" cy="36" r="6" fill="#ffd4d4"/>
+        <!-- flecha abajo -->
+        <polygon points="50,74 38,60 62,60" fill="#fff"/>
+        <rect x="46" y="56" width="8" height="14" rx="3" fill="#fff"/>
+        <!-- suelo -->
+        <rect x="20" y="80" width="60" height="7" rx="4" fill="#fff" opacity=".7"/>
+      </svg>
+      <span class="btn-label">Aterrizar</span>
+    </button>
+
+    <!-- AVANZAR (ancho completo) -->
+    <button class="btn btn-forward" id="btn-forward" onclick="sendCmd('forward','Avanzando… ➡️','✅ ¡Movimiento completado!','❌ Error al avanzar')">
+      <svg class="btn-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.18)"/>
+        <!-- flecha hacia arriba grande -->
+        <polygon points="50,12 80,52 62,52 62,85 38,85 38,52 20,52" fill="#fff"/>
+      </svg>
+      <span class="btn-label">Avanzar</span>
+    </button>
+
+    <!-- GIRAR IZQUIERDA -->
+    <button class="btn btn-left" id="btn-left" onclick="sendCmd('left','Girando a la izquierda… 🔄','✅ ¡Giro completado!','❌ Error al girar')">
+      <svg class="btn-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.18)"/>
+        <!-- flecha circular izquierda -->
+        <path d="M65 24 A28 28 0 1 0 74 56" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/>
+        <!-- punta de la flecha izquierda -->
+        <polygon points="60,14 60,34 44,24" fill="#fff"/>
+      </svg>
+      <span class="btn-label">Girar Izq.</span>
+    </button>
+
+    <!-- GIRAR DERECHA -->
+    <button class="btn btn-right" id="btn-right" onclick="sendCmd('right','Girando a la derecha… 🔄','✅ ¡Giro completado!','❌ Error al girar')">
+      <svg class="btn-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.18)"/>
+        <!-- flecha circular derecha -->
+        <path d="M35 24 A28 28 0 1 1 26 56" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/>
+        <!-- punta de la flecha derecha -->
+        <polygon points="40,14 40,34 56,24" fill="#fff"/>
+      </svg>
+      <span class="btn-label">Girar Der.</span>
+    </button>
+
+  </div>
+
+  <!-- Pie -->
+  <div class="footer">🌿 DJI RoboMaster TT Tello &nbsp;·&nbsp; ¡Vuela seguro!</div>
+
+</div><!-- /wrapper -->
+
+<!-- ── Script de control ─────────────────────────────────────────────────── -->
+<script>
+  // ── Configuración ──────────────────────────────────────────────────────────
+  // Cambia esta URL si el servidor Python corre en otra IP o puerto.
+  const SERVER = "http://127.0.0.1:5000";
+
+  const statusEl = document.getElementById("status");
+  const overlay  = document.getElementById("overlay");
+
+  /**
+   * Envía un comando al servidor Flask y actualiza la UI.
+   * @param {string} endpoint   - Ruta POST: 'takeoff', 'land', 'forward', 'left', 'right'
+   * @param {string} msgWait    - Texto mientras espera respuesta
+   * @param {string} msgOk      - Texto si el dron responde "ok"
+   * @param {string} msgErr     - Texto si hay error
+   */
+  async function sendCmd(endpoint, msgWait, msgOk, msgErr) {
+    // Bloquear UI mientras el dron ejecuta el comando
+    overlay.classList.add("active");
+    setStatus(msgWait, "wait");
+
+    try {
+      const res  = await fetch(`${SERVER}/${endpoint}`, { method: "POST" });
+      const data = await res.json();
+
+      if (data.success) {
+        setStatus(msgOk, "ok");
+      } else {
+        setStatus(`${msgErr} (${data.response})`, "error");
+      }
+    } catch (err) {
+      setStatus("❌ Sin conexión con el servidor", "error");
+      console.error(err);
+    } finally {
+      overlay.classList.remove("active");
+      // Volver al estado neutro tras 3 segundos
+      setTimeout(() => setStatus("✅ Listo para volar", ""), 3000);
+    }
+  }
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className   = "status-bar " + (cls || "");
+  }
+</script>
+
+</body>
+</html>

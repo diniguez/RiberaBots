@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, initial-scale=1.0">
+<title>Formación Profesional — IES Ribera del Tajo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream:    #F5F0E8;
+    --dark:     #0D1B2A;
+    --mid:      #1C2E40;
+    --gold:     #C8922A;
+    --gold-lt:  #E8B84B;
+    --admin-bg: #0B2545;
+    --sanit-bg: #0A3A2E;
+    --info-bg:  #1A0B3A;
+    --white:    #FFFFFF;
+    --text-muted: rgba(245,240,232,0.6);
+    --radius:   16px;
+    --transition: 0.45s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: var(--dark);
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--cream);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ─── SHARED LAYOUT ─────────────────────────────────── */
+  .view {
+    position: absolute;
+    inset: 0;
+    width: 1080px;
+    height: 1920px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition);
+  }
+  .view.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────────── */
+  .site-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 35px 60px 30px;
+    border-bottom: 1px solid rgba(200,146,42,0.25);
+    background: rgba(13,27,42,0.95);
+    backdrop-filter: blur(20px);
+    z-index: 10;
+  }
+  .logo-block { display: flex; align-items: center; gap: 24px; }
+  .logo-emblem {
+    width: 65px; height: 65px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 900;
+    color: var(--dark);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+  .logo-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px; font-weight: 700;
+    color: var(--white);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+  }
+  .logo-text p {
+    font-size: 16px; font-weight: 300;
+    color: var(--gold-lt);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .header-fp-badge {
+    background: var(--gold);
+    color: var(--dark);
+    font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700;
+    padding: 9px 25px;
+    border-radius: 30px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ─── HOME VIEW ──────────────────────────────────────── */
+  #home {
+    background: var(--dark);
+  }
+  .home-intro {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 50px 60px 40px;
+  }
+  .home-intro h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 46px; font-weight: 900;
+    color: var(--white);
+    line-height: 1.05;
+    letter-spacing: -1px;
+  }
+  .home-intro h2 em {
+    font-style: italic;
+    color: var(--gold-lt);
+  }
+  .home-intro p {
+    font-size: 19px; font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 20px;
+    max-width: 800px;
+    margin-left: auto; margin-right: auto;
+    line-height: 1.6;
+  }
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--gold);
+    margin: 30px auto;
+    border-radius: 3px;
+  }
+
+  /* Cards grid */
+  .cards-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    padding: 0 40px 50px;
+    min-height: 0;
+  }
+
+  .family-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid rgba(200,146,42,0.2);
+    transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    user-select: none;
+  }
+  .family-card:active {
+    transform: scale(0.975);
+  }
+  .family-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    border-color: var(--gold);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 0 1px var(--gold);
+  }
+
+  /* SVG background illustrations */
+  .card-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Admin card */
+  .card-admin .card-bg { background: var(--admin-bg); }
+  .card-admin .card-bg svg { width: 100%; height: 100%; opacity: 0.18; }
+
+  /* Sanidad card */
+  .card-sanit .card-bg { background: var(--sanit-bg); }
+  .card-sanit .card-bg svg { width: 100%; height: 100%; opacity: 0.18; }
+
+  /* Informática card */
+  .card-info .card-bg { background: var(--info-bg); }
+  .card-info .card-bg svg { width: 100%; height: 100%; opacity: 0.18; }
+
+  .card-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    opacity: 0.9;
+  }
+  .card-icon svg { width: 170px; height: 170px; }
+
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+  }
+
+  .card-content {
+    position: relative; z-index: 2;
+    padding: 40px 35px;
+  }
+  .card-tag {
+    display: inline-block;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-lt);
+    margin-bottom: 12px;
+    padding: 5px 14px;
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    background: rgba(200,146,42,0.12);
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 37px; font-weight: 900;
+    color: var(--white);
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+  .card-subtitle {
+    font-size: 15px; font-weight: 300;
+    color: rgba(255,255,255,0.65);
+    margin-top: 9px;
+    line-height: 1.4;
+  }
+  .card-cta {
+    margin-top: 25px;
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--gold);
+    color: var(--dark);
+    padding: 12px 26px;
+    border-radius: 30px;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: background var(--transition), gap var(--transition);
+  }
+  .family-card:hover .card-cta { background: var(--gold-lt); gap: 14px; }
+  .card-cta span { font-size: 16px; }
+
+  /* Footer home */
+  .home-footer {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 20px 60px 35px;
+    border-top: 1px solid rgba(200,146,42,0.15);
+    font-size: 14px; color: var(--text-muted); font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  /* ─── DETAIL VIEWS ───────────────────────────────────── */
+  .detail-view { flex-direction: column; }
+
+  .detail-hero {
+    flex-shrink: 0;
+    position: relative;
+    height: 350px;
+    display: flex; align-items: flex-end;
+    overflow: hidden;
+  }
+  .detail-hero-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .detail-hero-bg svg { width: 100%; height: 100%; }
+  .detail-hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+  }
+  .detail-hero-content {
+    position: relative; z-index: 2;
+    padding: 0 60px 40px;
+    display: flex; align-items: flex-end; gap: 30px;
+    width: 100%;
+  }
+  .detail-hero-icon svg { width: 100px; height: 100px; opacity: 0.9; }
+  .detail-hero-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 50px; font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .detail-hero-text p {
+    font-size: 17px; font-weight: 300;
+    color: rgba(255,255,255,0.7);
+    margin-top: 8px;
+  }
+
+  .detail-body {
+    flex: 1;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding: 40px 60px 40px;
+    display: flex; flex-direction: column; gap: 35px;
+  }
+  .detail-body::-webkit-scrollbar { width: 6px; }
+  .detail-body::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+  .detail-body::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+
+  .desc-block {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(200,146,42,0.2);
+    border-radius: 14px;
+    padding: 35px 40px;
+  }
+  .desc-block p {
+    font-size: 19px; font-weight: 300;
+    line-height: 1.75;
+    color: rgba(245,240,232,0.85);
+  }
+  .desc-block p strong {
+    color: var(--gold-lt);
+    font-weight: 600;
+  }
+
+  .grades-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 700;
+    color: var(--white);
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .grades-section h3::before {
+    content: '';
+    width: 4px; height: 28px;
+    background: var(--gold);
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .level-block {
+    margin-bottom: 26px;
+  }
+  .level-label {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 25px;
+    margin-bottom: 14px;
+  }
+  .level-label.basica { background: rgba(120,80,200,0.2); color: #C9A0F0; border: 1px solid rgba(180,120,255,0.3); }
+  .level-label.medio  { background: rgba(30,140,100,0.2); color: #7DE8C0; border: 1px solid rgba(80,200,150,0.3); }
+  .level-label.superior { background: rgba(40,100,200,0.2); color: #80C0FF; border: 1px solid rgba(80,150,255,0.3); }
+  .level-label.especializacion { background: rgba(200,146,42,0.2); color: var(--gold-lt); border: 1px solid rgba(200,146,42,0.4); }
+
+  .ciclos-list {
+    display: flex; flex-direction: column; gap: 11px;
+    padding-left: 6px;
+  }
+  .ciclo-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 20px 26px;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: default;
+  }
+  .ciclo-item:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(200,146,42,0.35);
+  }
+  .ciclo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+  .basica  .ciclo-dot { background: #C9A0F0; }
+  .medio   .ciclo-dot { background: #7DE8C0; }
+  .superior .ciclo-dot { background: #80C0FF; }
+  .especializacion .ciclo-dot { background: var(--gold-lt); }
+  .ciclo-text { flex: 1; }
+  .ciclo-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 600;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .ciclo-meta {
+    font-size: 14px; font-weight: 300;
+    color: var(--text-muted);
+    margin-top: 5px;
+    letter-spacing: 1px;
+  }
+
+  /* Back button */
+  .back-btn {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 14px;
+    margin: 0 60px 25px;
+    padding: 20px 35px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(200,146,42,0.35);
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--gold-lt);
+    font-size: 17px; font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    width: fit-content;
+    transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    user-select: none;
+  }
+  .back-btn:hover { background: rgba(200,146,42,0.12); border-color: var(--gold); transform: translateX(-4px); }
+  .back-btn:active { transform: scale(0.97); }
+  .back-arrow { font-size: 20px; }
+
+  /* Colour accents per family */
+  #detail-admin .detail-hero-bg { background: var(--admin-bg); }
+  #detail-admin .detail-hero-bg svg { opacity: 0.22; }
+
+  #detail-sanit .detail-hero-bg { background: var(--sanit-bg); }
+  #detail-sanit .detail-hero-bg svg { opacity: 0.22; }
+
+  #detail-info .detail-hero-bg  { background: var(--info-bg); }
+  #detail-info .detail-hero-bg svg  { opacity: 0.22; }
+
+  /* Animated enter */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .view.active .family-card {
+    animation: fadeSlideUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .view.active .family-card:nth-child(1) { animation-delay: 0.1s; }
+  .view.active .family-card:nth-child(2) { animation-delay: 0.2s; }
+  .view.active .family-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .view.active .desc-block,
+  .view.active .level-block {
+    animation: fadeSlideUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ HOME -->
+<section id="home" class="view active">
+
+  <header class="site-header">
+    <div class="logo-block">
+      <div class="logo-emblem">RT</div>
+      <div class="logo-text">
+        <h1>IES Ribera del Tajo</h1>
+        <p>Talavera de la Reina · Toledo</p>
+      </div>
+    </div>
+    <div class="header-fp-badge">Formación Profesional</div>
+  </header>
+
+  <div class="home-intro">
+    <h2>Tu futuro profesional<br>empieza <em>aquí</em></h2>
+    <div class="divider"></div>
+    <p>Descubre las tres familias profesionales que impartimos y encuentra la titulación que se adapta a tu vocación y a las demandas del mercado laboral.</p>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- Administración y Gestión -->
+    <div class="family-card card-admin" onclick="showDetail('admin')">
+      <div class="card-bg">
+        <svg viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg">
+          <rect x="60" y="80" width="480" height="620" rx="18" fill="none" stroke="#C8922A" stroke-width="3"/>
+          <line x1="100" y1="200" x2="500" y2="200" stroke="#C8922A" stroke-width="2"/>
+          <line x1="100" y1="280" x2="500" y2="280" stroke="#C8922A" stroke-width="2"/>
+          <line x1="100" y1="360" x2="500" y2="360" stroke="#C8922A" stroke-width="2"/>
+          <line x1="100" y1="440" x2="500" y2="440" stroke="#C8922A" stroke-width="2"/>
+          <line x1="100" y1="520" x2="500" y2="520" stroke="#C8922A" stroke-width="2"/>
+          <circle cx="300" cy="730" r="80" fill="none" stroke="#C8922A" stroke-width="3"/>
+          <line x1="220" y1="730" x2="380" y2="730" stroke="#C8922A" stroke-width="2"/>
+          <line x1="300" y1="650" x2="300" y2="810" stroke="#C8922A" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="card-icon">
+        <svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <rect x="50" y="60" width="240" height="300" rx="20" fill="rgba(200,146,42,0.15)" stroke="#C8922A" stroke-width="6"/>
+          <rect x="90" y="110" width="160" height="20" rx="8" fill="#E8B84B"/>
+          <rect x="90" y="155" width="130" height="16" rx="8" fill="rgba(232,184,75,0.5)"/>
+          <rect x="90" y="195" width="150" height="16" rx="8" fill="rgba(232,184,75,0.5)"/>
+          <rect x="90" y="235" width="110" height="16" rx="8" fill="rgba(232,184,75,0.5)"/>
+          <rect x="90" y="275" width="140" height="16" rx="8" fill="rgba(232,184,75,0.5)"/>
+          <circle cx="255" cy="290" r="55" fill="#C8922A"/>
+          <path d="M235 290 l15 15 l30-28" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <div class="card-tag">Familia profesional</div>
+        <div class="card-title">Administración<br>y Gestión</div>
+        <div class="card-subtitle">Gestión empresarial, finanzas y dirección</div>
+        <div class="card-cta">Conocer grados <span>→</span></div>
+      </div>
+    </div>
+
+    <!-- Sanidad -->
+    <div class="family-card card-sanit" onclick="showDetail('sanit')">
+      <div class="card-bg">
+        <svg viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="300" cy="300" r="200" fill="none" stroke="#2ECC71" stroke-width="3"/>
+          <circle cx="300" cy="300" r="140" fill="none" stroke="#2ECC71" stroke-width="2"/>
+          <line x1="300" y1="160" x2="300" y2="440" stroke="#2ECC71" stroke-width="3"/>
+          <line x1="160" y1="300" x2="440" y2="300" stroke="#2ECC71" stroke-width="3"/>
+          <circle cx="300" cy="650" r="100" fill="none" stroke="#2ECC71" stroke-width="3"/>
+          <path d="M250 650 q50-60 100 0" fill="none" stroke="#2ECC71" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="card-icon">
+        <svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <circle cx="170" cy="150" r="110" fill="rgba(46,204,113,0.12)" stroke="#2ECC71" stroke-width="6"/>
+          <rect x="145" y="90" width="50" height="120" rx="10" fill="#2ECC71"/>
+          <rect x="110" y="125" width="120" height="50" rx="10" fill="#2ECC71"/>
+          <path d="M90 270 q80 70 160 0" stroke="#2ECC71" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <circle cx="170" cy="300" r="22" fill="rgba(46,204,113,0.3)" stroke="#2ECC71" stroke-width="4"/>
+        </svg>
+      </div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <div class="card-tag">Familia profesional</div>
+        <div class="card-title">Sanidad</div>
+        <div class="card-subtitle">Cuidados, laboratorio y diagnóstico clínico</div>
+        <div class="card-cta">Conocer grados <span>→</span></div>
+      </div>
+    </div>
+
+    <!-- Informática -->
+    <div class="family-card card-info" onclick="showDetail('info')">
+      <div class="card-bg">
+        <svg viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg">
+          <rect x="80" y="100" width="100" height="100" rx="8" fill="none" stroke="#6C63FF" stroke-width="3"/>
+          <rect x="250" y="100" width="100" height="100" rx="8" fill="none" stroke="#6C63FF" stroke-width="3"/>
+          <rect x="420" y="100" width="100" height="100" rx="8" fill="none" stroke="#6C63FF" stroke-width="3"/>
+          <line x1="180" y1="150" x2="250" y2="150" stroke="#6C63FF" stroke-width="2"/>
+          <line x1="350" y1="150" x2="420" y2="150" stroke="#6C63FF" stroke-width="2"/>
+          <rect x="165" y="300" width="270" height="180" rx="12" fill="none" stroke="#6C63FF" stroke-width="3"/>
+          <line x1="300" y1="200" x2="300" y2="300" stroke="#6C63FF" stroke-width="2"/>
+          <circle cx="300" cy="570" r="120" fill="none" stroke="#6C63FF" stroke-width="3"/>
+          <line x1="300" y1="570" x2="390" y2="470" stroke="#6C63FF" stroke-width="2"/>
+          <circle cx="300" cy="570" r="18" fill="#6C63FF"/>
+        </svg>
+      </div>
+      <div class="card-icon">
+        <svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <rect x="40" y="80" width="260" height="170" rx="18" fill="rgba(108,99,255,0.12)" stroke="#6C63FF" stroke-width="6"/>
+          <rect x="65" y="105" width="210" height="120" rx="8" fill="rgba(108,99,255,0.08)"/>
+          <path d="M95 165 l25-25 l25 25 l40-50 l25 20" stroke="#6C63FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="120" y="250" width="100" height="22" rx="4" fill="rgba(108,99,255,0.4)"/>
+          <rect x="80" y="272" width="180" height="14" rx="4" fill="rgba(108,99,255,0.25)"/>
+          <circle cx="255" cy="280" r="50" fill="#6C63FF"/>
+          <path d="M238 280 l10-14 l10 8 l14-18" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <div class="card-tag">Familia profesional</div>
+        <div class="card-title">Informática y<br>Comunicaciones</div>
+        <div class="card-subtitle">Sistemas, redes, desarrollo e inteligencia artificial</div>
+        <div class="card-cta">Conocer grados <span>→</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="home-footer">
+    IES Ribera del Tajo · Av. Real Fábrica de Sedas, s/n · 45600 Talavera de la Reina (Toledo) · Tel. 925 722 233
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════ ADMINISTRACIÓN -->
+<section id="detail-admin" class="view detail-view">
+
+  <header class="site-header">
+    <div class="logo-block">
+      <div class="logo-emblem">RT</div>
+      <div class="logo-text">
+        <h1>IES Ribera del Tajo</h1>
+        <p>Talavera de la Reina · Toledo</p>
+      </div>
+    </div>
+    <div class="header-fp-badge">Formación Profesional</div>
+  </header>
+
+  <div class="detail-hero">
+    <div class="detail-hero-bg">
+      <svg viewBox="0 0 2160 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <rect width="2160" height="700" fill="#0B2545"/>
+        <circle cx="400" cy="350" r="500" fill="none" stroke="#C8922A" stroke-width="2" opacity="0.3"/>
+        <circle cx="400" cy="350" r="350" fill="none" stroke="#C8922A" stroke-width="1.5" opacity="0.2"/>
+        <line x1="0" y1="200" x2="2160" y2="200" stroke="#C8922A" stroke-width="1" opacity="0.15"/>
+        <line x1="0" y1="400" x2="2160" y2="400" stroke="#C8922A" stroke-width="1" opacity="0.15"/>
+        <line x1="0" y1="600" x2="2160" y2="600" stroke="#C8922A" stroke-width="1" opacity="0.15"/>
+        <rect x="1400" y="100" width="600" height="500" rx="20" fill="none" stroke="#C8922A" stroke-width="2" opacity="0.2"/>
+        <rect x="1500" y="180" width="400" height="60" rx="8" fill="rgba(200,146,42,0.1)"/>
+        <rect x="1500" y="270" width="320" height="40" rx="8" fill="rgba(200,146,42,0.07)"/>
+        <rect x="1500" y="340" width="360" height="40" rx="8" fill="rgba(200,146,42,0.07)"/>
+        <rect x="1500" y="410" width="280" height="40" rx="8" fill="rgba(200,146,42,0.07)"/>
+        <rect x="1500" y="480" width="340" height="40" rx="8" fill="rgba(200,146,42,0.07)"/>
+      </svg>
+    </div>
+    <div class="detail-hero-overlay"></div>
+    <div class="detail-hero-content">
+      <div class="detail-hero-icon">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <rect x="30" y="20" width="140" height="170" rx="14" fill="rgba(200,146,42,0.2)" stroke="#C8922A" stroke-width="5"/>
+          <rect x="55" y="60" width="90" height="12" rx="5" fill="#E8B84B"/>
+          <rect x="55" y="88" width="75" height="10" rx="5" fill="rgba(232,184,75,0.5)"/>
+          <rect x="55" y="112" width="85" height="10" rx="5" fill="rgba(232,184,75,0.5)"/>
+          <rect x="55" y="136" width="65" height="10" rx="5" fill="rgba(232,184,75,0.5)"/>
+          <circle cx="148" cy="162" r="32" fill="#C8922A"/>
+          <path d="M136 162 l9 9 l18-18" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="detail-hero-text">
+        <h2>Administración y Gestión</h2>
+        <p>Familia Profesional · IES Ribera del Tajo</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-body">
+
+    <div class="desc-block">
+      <p>La familia profesional de <strong>Administración y Gestión</strong> forma profesionales altamente cualificados para desenvolverse en el entorno empresarial y administrativo. Nuestros titulados adquieren competencias en gestión contable, financiera, recursos humanos y dirección de empresas, con una orientación práctica y dual que garantiza una <strong>elevada inserción laboral</strong> en empresas de cualquier sector.</p>
+    </div>
+
+    <div class="grades-section">
+      <h3>Titulaciones que se imparten</h3>
+
+      <div class="level-block">
+        <div class="level-label medio">
+          <span>◆</span> Grado Medio
+        </div>
+        <div class="ciclos-list medio">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico en Gestión Administrativa</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Medio · 2000 h.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-block">
+        <div class="level-label superior">
+          <span>◆</span> Grado Superior
+        </div>
+        <div class="ciclos-list superior">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico Superior en Administración y Finanzas</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Superior · 2000 h.</div>
+            </div>
+          </div>
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico Superior en Asistencia a la Dirección</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Superior · 2000 h.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="back-btn" onclick="showHome()">
+    <span class="back-arrow">←</span> Volver a todas las familias
+  </div>
+
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════ SANIDAD -->
+<section id="detail-sanit" class="view detail-view">
+
+  <header class="site-header">
+    <div class="logo-block">
+      <div class="logo-emblem">RT</div>
+      <div class="logo-text">
+        <h1>IES Ribera del Tajo</h1>
+        <p>Talavera de la Reina · Toledo</p>
+      </div>
+    </div>
+    <div class="header-fp-badge">Formación Profesional</div>
+  </header>
+
+  <div class="detail-hero">
+    <div class="detail-hero-bg">
+      <svg viewBox="0 0 2160 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <rect width="2160" height="700" fill="#0A3A2E"/>
+        <circle cx="300" cy="350" r="450" fill="none" stroke="#2ECC71" stroke-width="2" opacity="0.25"/>
+        <circle cx="300" cy="350" r="280" fill="none" stroke="#2ECC71" stroke-width="1.5" opacity="0.15"/>
+        <line x1="0" y1="350" x2="2160" y2="350" stroke="#2ECC71" stroke-width="1" opacity="0.15"/>
+        <rect x="1350" y="80" width="680" height="540" rx="30" fill="none" stroke="#2ECC71" stroke-width="2" opacity="0.18"/>
+        <rect x="1630" y="150" width="60" height="200" rx="10" fill="rgba(46,204,113,0.18)"/>
+        <rect x="1560" y="220" width="200" height="60" rx="10" fill="rgba(46,204,113,0.18)"/>
+        <circle cx="1690" cy="430" r="80" fill="none" stroke="#2ECC71" stroke-width="2" opacity="0.25"/>
+        <circle cx="1690" cy="430" r="50" fill="rgba(46,204,113,0.1)"/>
+      </svg>
+    </div>
+    <div class="detail-hero-overlay"></div>
+    <div class="detail-hero-content">
+      <div class="detail-hero-icon">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <circle cx="100" cy="90" r="70" fill="rgba(46,204,113,0.15)" stroke="#2ECC71" stroke-width="5"/>
+          <rect x="84" y="50" width="32" height="80" rx="8" fill="#2ECC71"/>
+          <rect x="60" y="74" width="80" height="32" rx="8" fill="#2ECC71"/>
+          <path d="M50 165 q50 40 100 0" stroke="#2ECC71" stroke-width="5" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="detail-hero-text">
+        <h2>Sanidad</h2>
+        <p>Familia Profesional · IES Ribera del Tajo</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-body">
+
+    <div class="desc-block">
+      <p>La familia profesional de <strong>Sanidad</strong> prepara a los futuros profesionales del sector sanitario con una formación rigurosa, humanista y práctica. Desde los cuidados de enfermería hasta el diagnóstico clínico y laboratorio biomédico, nuestros ciclos responden a la alta demanda de <strong>personal cualificado en el sistema de salud</strong>, con prácticas en centros hospitalarios y clínicas de referencia.</p>
+    </div>
+
+    <div class="grades-section">
+      <h3>Titulaciones que se imparten</h3>
+
+      <div class="level-block">
+        <div class="level-label medio">
+          <span>◆</span> Grado Medio
+        </div>
+        <div class="ciclos-list medio">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico en Cuidados Auxiliares de Enfermería</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Medio · 2000 h.</div>
+            </div>
+          </div>
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico en Farmacia y Parafarmacia</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Medio · 2000 h.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-block">
+        <div class="level-label superior">
+          <span>◆</span> Grado Superior
+        </div>
+        <div class="ciclos-list superior">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico Superior de Anatomía Patológica y Citodiagnóstico</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Superior · 2000 h.</div>
+            </div>
+          </div>
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico Superior de Laboratorio Clínico y Biomédico</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Superior · 2000 h.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="back-btn" onclick="showHome()">
+    <span class="back-arrow">←</span> Volver a todas las familias
+  </div>
+
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════ INFORMÁTICA -->
+<section id="detail-info" class="view detail-view">
+
+  <header class="site-header">
+    <div class="logo-block">
+      <div class="logo-emblem">RT</div>
+      <div class="logo-text">
+        <h1>IES Ribera del Tajo</h1>
+        <p>Talavera de la Reina · Toledo</p>
+      </div>
+    </div>
+    <div class="header-fp-badge">Formación Profesional</div>
+  </header>
+
+  <div class="detail-hero">
+    <div class="detail-hero-bg">
+      <svg viewBox="0 0 2160 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <rect width="2160" height="700" fill="#1A0B3A"/>
+        <circle cx="350" cy="350" r="400" fill="none" stroke="#6C63FF" stroke-width="2" opacity="0.25"/>
+        <circle cx="350" cy="350" r="240" fill="none" stroke="#6C63FF" stroke-width="1.5" opacity="0.18"/>
+        <!-- grid -->
+        <line x1="0" y1="175" x2="2160" y2="175" stroke="#6C63FF" stroke-width="1" opacity="0.12"/>
+        <line x1="0" y1="350" x2="2160" y2="350" stroke="#6C63FF" stroke-width="1" opacity="0.12"/>
+        <line x1="0" y1="525" x2="2160" y2="525" stroke="#6C63FF" stroke-width="1" opacity="0.12"/>
+        <!-- nodes -->
+        <circle cx="1400" cy="180" r="12" fill="#6C63FF" opacity="0.6"/>
+        <circle cx="1620" cy="300" r="8" fill="#6C63FF" opacity="0.5"/>
+        <circle cx="1820" cy="160" r="14" fill="#6C63FF" opacity="0.6"/>
+        <circle cx="1950" cy="400" r="10" fill="#6C63FF" opacity="0.5"/>
+        <circle cx="1700" cy="520" r="9" fill="#6C63FF" opacity="0.5"/>
+        <circle cx="1500" cy="440" r="7" fill="#6C63FF" opacity="0.4"/>
+        <line x1="1400" y1="180" x2="1620" y2="300" stroke="#6C63FF" stroke-width="1.5" opacity="0.3"/>
+        <line x1="1620" y1="300" x2="1820" y2="160" stroke="#6C63FF" stroke-width="1.5" opacity="0.3"/>
+        <line x1="1820" y1="160" x2="1950" y2="400" stroke="#6C63FF" stroke-width="1.5" opacity="0.3"/>
+        <line x1="1950" y1="400" x2="1700" y2="520" stroke="#6C63FF" stroke-width="1.5" opacity="0.3"/>
+        <line x1="1700" y1="520" x2="1500" y2="440" stroke="#6C63FF" stroke-width="1.5" opacity="0.3"/>
+        <line x1="1500" y1="440" x2="1620" y2="300" stroke="#6C63FF" stroke-width="1.5" opacity="0.3"/>
+        <line x1="1620" y1="300" x2="1700" y2="520" stroke="#6C63FF" stroke-width="1" opacity="0.2"/>
+        <line x1="1400" y1="180" x2="1820" y2="160" stroke="#6C63FF" stroke-width="1" opacity="0.2"/>
+      </svg>
+    </div>
+    <div class="detail-hero-overlay"></div>
+    <div class="detail-hero-content">
+      <div class="detail-hero-icon">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <rect x="20" y="50" width="160" height="100" rx="14" fill="rgba(108,99,255,0.18)" stroke="#6C63FF" stroke-width="5"/>
+          <rect x="38" y="68" width="124" height="64" rx="6" fill="rgba(108,99,255,0.1)"/>
+          <path d="M55 100 l18-18 l18 18 l28-35 l18 15" stroke="#6C63FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="72" y="150" width="56" height="14" rx="4" fill="rgba(108,99,255,0.4)"/>
+          <rect x="50" y="164" width="100" height="10" rx="4" fill="rgba(108,99,255,0.25)"/>
+        </svg>
+      </div>
+      <div class="detail-hero-text">
+        <h2>Informática y Comunicaciones</h2>
+        <p>Familia Profesional · IES Ribera del Tajo</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-body">
+
+    <div class="desc-block">
+      <p>La familia de <strong>Informática y Comunicaciones</strong> es referente nacional en innovación tecnológica. Impartimos desde titulaciones básicas hasta cursos de especialización punteros en <strong>Inteligencia Artificial y Big Data</strong>, formando profesionales capaces de diseñar, administrar y desarrollar sistemas informáticos en un sector con las mayores tasas de empleabilidad del mercado actual.</p>
+    </div>
+
+    <div class="grades-section">
+      <h3>Titulaciones que se imparten</h3>
+
+      <div class="level-block">
+        <div class="level-label basica">
+          <span>◆</span> Formación Profesional Básica
+        </div>
+        <div class="ciclos-list basica">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Profesional Básico en Informática y Comunicaciones</div>
+              <div class="ciclo-meta">FP Básica · 2000 h.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-block">
+        <div class="level-label medio">
+          <span>◆</span> Grado Medio
+        </div>
+        <div class="ciclos-list medio">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico en Sistemas Microinformáticos y Redes</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Medio · 2000 h.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-block">
+        <div class="level-label superior">
+          <span>◆</span> Grado Superior
+        </div>
+        <div class="ciclos-list superior">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico Superior en Administración de Sistemas Informáticos en Red</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Superior · 2000 h.</div>
+            </div>
+          </div>
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico Superior en Desarrollo de Aplicaciones Web</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Superior · 2000 h.</div>
+            </div>
+          </div>
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Técnico Superior en Desarrollo de Aplicaciones Multiplataforma</div>
+              <div class="ciclo-meta">Ciclo Formativo de Grado Superior · 2000 h.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-block">
+        <div class="level-label especializacion">
+          <span>◆</span> Curso de Especialización
+        </div>
+        <div class="ciclos-list especializacion">
+          <div class="ciclo-item">
+            <div class="ciclo-dot"></div>
+            <div class="ciclo-text">
+              <div class="ciclo-name">Inteligencia Artificial y Big Data</div>
+              <div class="ciclo-meta">Curso de Especialización · Centro de Excelencia Nacional</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="back-btn" onclick="showHome()">
+    <span class="back-arrow">←</span> Volver a todas las familias
+  </div>
+
+</section>
+
+
+<script>
+  function showDetail(family) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('detail-' + family).classList.add('active');
+    const body = document.querySelector('#detail-' + family + ' .detail-body');
+    if (body) body.scrollTop = 0;
+  }
+  function showHome() {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('home').classList.add('active');
+  }
+</script>
+</body>
+</html>

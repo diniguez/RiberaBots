@@ -11,7 +11,16 @@ async def main():
     comandos = [
         b'ksit\n',
         b'kstand\n',
-        b'kup\n'
+        b'kup\n',
+        b'kpee\n',
+        b'kck\n',
+        b'khi\n',
+        b'kvtF\n',
+        b'kwkF\n',
+        b'kwkL\n',
+        b'ksit\n',
+        b'kup\n',
+        b'kstand\n'
         ]
 
     print("Buscando PetoiBLE...")
