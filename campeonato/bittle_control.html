@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐾 ¡Mueve a Bittle!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Variables ──────────────────────────────────────────────────────── */
+    :root {
+      --sky:        #fff9e6;
+      --cloud:      #ffffff;
+      --yellow:     #FFD93D;
+      --orange:     #FF6B35;
+      --pink:       #FF6FA8;
+      --green:      #6BCB77;
+      --blue:       #4D96FF;
+      --purple:     #C77DFF;
+      --dark:       #2d2d2d;
+      --shadow-fun: 0 12px 0px;
+
+      /* Resolución efectiva del kiosco: 2160×3840 al 200% = 1080×1920 CSS px */
+      --btn-size:   340px;
+      --gap:        60px;
+      --icon-size:  140px;
+    }
+
+    /* ── Reset & base ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Fredoka One', cursive;
+      background-color: var(--sky);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 60px 40px 50px;
+      position: relative;
+    }
+
+    /* ── Fondo animado ──────────────────────────────────────────────────── */
+    .bg-shapes {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .dot {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.18;
+      animation: float-dot linear infinite;
+    }
+
+    @keyframes float-dot {
+      0%   { transform: translateY(0)   rotate(0deg);   }
+      50%  { transform: translateY(-40px) rotate(180deg); }
+      100% { transform: translateY(0)   rotate(360deg); }
+    }
+
+    /* estrellas decorativas */
+    .star {
+      position: absolute;
+      font-size: 3rem;
+      opacity: 0.25;
+      animation: spin-star 8s linear infinite;
+    }
+    @keyframes spin-star {
+      from { transform: rotate(0deg) scale(1);   }
+      50%  { transform: rotate(180deg) scale(1.3); }
+      to   { transform: rotate(360deg) scale(1);  }
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    .header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 5.5rem;
+      color: var(--dark);
+      letter-spacing: 2px;
+      line-height: 1.1;
+      text-shadow:
+        4px 4px 0 var(--yellow),
+        8px 8px 0 var(--orange);
+    }
+
+    .header .subtitle {
+      font-family: 'Nunito', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--orange);
+      margin-top: 14px;
+      letter-spacing: 1px;
+    }
+
+    .dog-emoji {
+      font-size: 6rem;
+      display: inline-block;
+      animation: wiggle 1.8s ease-in-out infinite;
+    }
+    @keyframes wiggle {
+      0%,100% { transform: rotate(-8deg); }
+      50%      { transform: rotate(8deg);  }
+    }
+
+    /* ── Status badge ───────────────────────────────────────────────────── */
+    .status-badge {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      padding: 12px 32px;
+      border-radius: 999px;
+      border: 4px solid currentColor;
+      margin-top: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all .3s;
+    }
+    .status-badge.ok      { color: var(--green);  background: #e8ffed; }
+    .status-badge.error   { color: var(--orange); background: #fff3ee; }
+    .status-badge.sending { color: var(--blue);   background: #eef4ff; }
+
+    .status-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: blink 1s step-start infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Grid de botones ────────────────────────────────────────────────── */
+    .controls {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-areas:
+        ".    up    .   "
+        "left mid   right"
+        ".    down  .   ";
+      grid-template-columns: var(--btn-size) var(--btn-size) var(--btn-size);
+      grid-template-rows:    var(--btn-size) var(--btn-size) var(--btn-size);
+      gap: var(--gap);
+    }
+
+    /* centro vacío con logo */
+    .center-logo {
+      grid-area: mid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .center-logo img,
+    .center-logo .paw {
+      font-size: 9rem;
+      animation: pulse 2s ease-in-out infinite;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1);    }
+      50%      { transform: scale(1.08); }
+    }
+
+    /* ── Botón base ─────────────────────────────────────────────────────── */
+    .btn {
+      width:  var(--btn-size);
+      height: var(--btn-size);
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2rem;
+      color: #fff;
+      letter-spacing: 1px;
+      position: relative;
+      transition: transform .12s ease, box-shadow .12s ease;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(255,255,255,0.15);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .btn svg {
+      width:  var(--icon-size);
+      height: var(--icon-size);
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2));
+      flex-shrink: 0;
+    }
+
+    /* Press effect */
+    .btn:active {
+      transform: translateY(8px) scale(0.97);
+    }
+
+    .btn:active::before { opacity: 1; }
+
+    /* Ripple on touch */
+    .btn .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      transform: scale(0);
+      animation: ripple-anim .6s linear forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-anim {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ── Colores y sombras por dirección ─────────────────────────────────── */
+    #btn-forward  {
+      grid-area: up;
+      background: linear-gradient(145deg, #4D96FF, #1a6fd4);
+      box-shadow: var(--shadow-fun) #1a5dbf;
+    }
+    #btn-forward:active  { box-shadow: 0 4px 0px #1a5dbf; }
+
+    #btn-backward {
+      grid-area: down;
+      background: linear-gradient(145deg, #FF6FA8, #e0397a);
+      box-shadow: var(--shadow-fun) #c42a68;
+    }
+    #btn-backward:active { box-shadow: 0 4px 0px #c42a68; }
+
+    #btn-left {
+      grid-area: left;
+      background: linear-gradient(145deg, #6BCB77, #3da64a);
+      box-shadow: var(--shadow-fun) #2e8a3a;
+    }
+    #btn-left:active  { box-shadow: 0 4px 0px #2e8a3a; }
+
+    #btn-right {
+      grid-area: right;
+      background: linear-gradient(145deg, #FFD93D, #f5b800);
+      box-shadow: var(--shadow-fun) #c79300;
+      color: var(--dark);
+    }
+    #btn-right:active { box-shadow: 0 4px 0px #c79300; }
+
+    /* ── Footer ─────────────────────────────────────────────────────────── */
+    .footer {
+      position: relative;
+      z-index: 10;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #bbb;
+      text-align: center;
+      letter-spacing: .5px;
+    }
+
+    /* ── Toast de feedback ──────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: var(--dark);
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      padding: 20px 50px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s, transform .3s;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Config panel (oculto, accesible por doble tap en footer) ────────── */
+    #config-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+    }
+    #config-panel.open { display: flex; }
+
+    .config-box {
+      background: white;
+      border-radius: 40px;
+      padding: 60px 80px;
+      text-align: center;
+      border: 6px solid var(--yellow);
+      box-shadow: 0 20px 0 #e0a800;
+      max-width: 700px;
+      width: 90%;
+    }
+
+    .config-box h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 3.5rem;
+      color: var(--dark);
+      margin-bottom: 30px;
+    }
+
+    .config-box label {
+      font-family: 'Nunito', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--dark);
+      display: block;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .config-box input {
+      width: 100%;
+      padding: 18px 24px;
+      border: 4px solid var(--blue);
+      border-radius: 20px;
+      font-size: 2.2rem;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      margin-bottom: 24px;
+      outline: none;
+      color: var(--dark);
+    }
+
+    .config-box input:focus { border-color: var(--orange); }
+
+    .config-btns {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .config-btns button {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      padding: 18px 44px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform .12s;
+    }
+    .config-btns button:active { transform: scale(.95); }
+
+    .btn-save   { background: var(--green);  color: white; box-shadow: 0 6px 0 #2e8a3a; }
+    .btn-cancel { background: #eee;          color: #666;  box-shadow: 0 6px 0 #ccc; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Fondo decorativo -->
+  <div class="bg-shapes" id="bg-shapes"></div>
+
+  <!-- Cabecera -->
+  <header class="header">
+    <div class="dog-emoji">🐾</div>
+    <h1>¡Mueve a Bittle!</h1>
+    <p class="subtitle">Toca un botón para mover al robot 🤖</p>
+    <div class="status-badge ok" id="status-badge">
+      <span class="status-dot"></span>
+      <span id="status-text">Listo para jugar</span>
+    </div>
+  </header>
+
+  <!-- Controles -->
+  <main class="controls" aria-label="Controles de movimiento">
+
+    <!-- ADELANTE -->
+    <button class="btn" id="btn-forward"
+            aria-label="Caminar hacia adelante"
+            data-dir="forward" data-label="¡Adelante!">
+
+      <!-- Icono: pata con flecha arriba -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Pata de perro simplificada -->
+        <ellipse cx="50" cy="68" rx="22" ry="16" fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="34" cy="80" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="50" cy="84" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="66" cy="80" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="50" cy="56" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <!-- Flecha arriba -->
+        <polygon points="50,10 30,38 40,38 40,52 60,52 60,38 70,38"
+                 fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      </svg>
+      Adelante
+    </button>
+
+    <!-- IZQUIERDA -->
+    <button class="btn" id="btn-left"
+            aria-label="Caminar hacia la izquierda"
+            data-dir="left" data-label="¡Izquierda!">
+
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="50" cy="50" rx="16" ry="22" fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="38" cy="34" rx="6"  ry="8"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="62" cy="34" rx="6"  ry="8"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="38" cy="66" rx="6"  ry="8"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="62" cy="66" rx="6"  ry="8"  fill="rgba(255,255,255,0.9)"/>
+        <!-- Flecha izquierda -->
+        <polygon points="10,50 38,30 38,40 52,40 52,60 38,60 38,70"
+                 fill="rgba(255,255,255,0.95)"/>
+      </svg>
+      Izquierda
+    </button>
+
+    <!-- Centro: pata animada -->
+    <div class="center-logo" aria-hidden="true">
+      <span class="paw">🐕</span>
+    </div>
+
+    <!-- DERECHA -->
+    <button class="btn" id="btn-right"
+            aria-label="Caminar hacia la derecha"
+            data-dir="right" data-label="¡Derecha!">
+
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="50" cy="50" rx="16" ry="22" fill="rgba(0,0,0,0.18)"/>
+        <ellipse cx="38" cy="34" rx="6"  ry="8"  fill="rgba(0,0,0,0.18)"/>
+        <ellipse cx="62" cy="34" rx="6"  ry="8"  fill="rgba(0,0,0,0.18)"/>
+        <ellipse cx="38" cy="66" rx="6"  ry="8"  fill="rgba(0,0,0,0.18)"/>
+        <ellipse cx="62" cy="66" rx="6"  ry="8"  fill="rgba(0,0,0,0.18)"/>
+        <!-- Flecha derecha -->
+        <polygon points="90,50 62,30 62,40 48,40 48,60 62,60 62,70"
+                 fill="rgba(0,0,0,0.3)"/>
+      </svg>
+      Derecha
+    </button>
+
+    <!-- ATRÁS -->
+    <button class="btn" id="btn-backward"
+            aria-label="Caminar hacia atrás"
+            data-dir="backward" data-label="¡Atrás!">
+
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="50" cy="32" rx="22" ry="16" fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="34" cy="20" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="50" cy="16" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="66" cy="20" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <ellipse cx="50" cy="44" rx="8"  ry="6"  fill="rgba(255,255,255,0.9)"/>
+        <!-- Flecha abajo -->
+        <polygon points="50,90 30,62 40,62 40,48 60,48 60,62 70,62"
+                 fill="rgba(255,255,255,0.95)"/>
+      </svg>
+      Atrás
+    </button>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="footer-area">
+    🌟 Petoi Bittle Controller &nbsp;·&nbsp; <span id="server-url">localhost:5000</span>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Panel de configuración (doble tap en footer) -->
+  <div id="config-panel" role="dialog" aria-modal="true" aria-label="Configuración del servidor">
+    <div class="config-box">
+      <h2>⚙️ Configuración</h2>
+
+      <label for="input-host">IP / Host del servidor</label>
+      <input id="input-host" type="text" value="localhost" autocomplete="off" inputmode="url" />
+
+      <label for="input-port">Puerto</label>
+      <input id="input-port" type="number" value="5000" autocomplete="off" inputmode="numeric" />
+
+      <div class="config-btns">
+        <button class="btn-save"   id="btn-save-config">✅ Guardar</button>
+        <button class="btn-cancel" id="btn-close-config">✖ Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ── Configuración del servidor ─────────────────────────────────────── */
+  let SERVER_HOST = 'localhost';
+  let SERVER_PORT = 5000;
+
+  const getUrl = (path) => `http://${SERVER_HOST}:${SERVER_PORT}${path}`;
+
+  /* ── Estado UI ──────────────────────────────────────────────────────── */
+  const statusBadge = document.getElementById('status-badge');
+  const statusText  = document.getElementById('status-text');
+  const toast       = document.getElementById('toast');
+  let   toastTimer  = null;
+
+  function setStatus(type, msg) {
+    statusBadge.className = `status-badge ${type}`;
+    statusText.textContent = msg;
+  }
+
+  function showToast(msg, duration = 1800) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+  }
+
+  /* ── Efecto ripple en botones ───────────────────────────────────────── */
+  function createRipple(btn, e) {
+    const circle  = document.createElement('span');
+    const rect    = btn.getBoundingClientRect();
+    const size    = Math.max(rect.width, rect.height);
+    const clientX = e.clientX ?? (e.touches?.[0]?.clientX ?? rect.left + rect.width / 2);
+    const clientY = e.clientY ?? (e.touches?.[0]?.clientY ?? rect.top  + rect.height / 2);
+
+    circle.className = 'ripple';
+    circle.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${clientX - rect.left - size / 2}px;
+      top:  ${clientY - rect.top  - size / 2}px;
+    `;
+    btn.appendChild(circle);
+    circle.addEventListener('animationend', () => circle.remove());
+  }
+
+  /* ── Enviar comando ─────────────────────────────────────────────────── */
+  async function sendCommand(direction, label) {
+    setStatus('sending', `Enviando... ${label}`);
+
+    try {
+      const res  = await fetch(getUrl(`/move/${direction}`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(4000)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setStatus('ok', `✅ ${label}`);
+        showToast(`${label} 🐾`);
+      } else {
+        setStatus('error', `⚠️ ${data.error || 'Error'}`);
+        showToast(`⚠️ ${data.error || 'Error'}`, 3000);
+      }
+    } catch (err) {
+      const msg = err.name === 'TimeoutError'
+        ? '⏱ Sin respuesta del servidor'
+        : '🔌 No se puede conectar';
+      setStatus('error', msg);
+      showToast(msg, 3000);
+      console.error('[Bittle]', err);
+    }
+  }
+
+  /* ── Listeners de botones ───────────────────────────────────────────── */
+  document.querySelectorAll('.btn[data-dir]').forEach(btn => {
+    const dir   = btn.dataset.dir;
+    const label = btn.dataset.label;
+
+    const handler = (e) => {
+      createRipple(btn, e);
+      sendCommand(dir, label);
+    };
+
+    btn.addEventListener('touchstart', handler, { passive: true });
+    btn.addEventListener('click',      handler);
+  });
+
+  /* ── Panel de configuración ─────────────────────────────────────────── */
+  const configPanel   = document.getElementById('config-panel');
+  const inputHost     = document.getElementById('input-host');
+  const inputPort     = document.getElementById('input-port');
+  const serverUrlSpan = document.getElementById('server-url');
+  const footerArea    = document.getElementById('footer-area');
+
+  let tapCount = 0, tapTimer = null;
+
+  footerArea.addEventListener('click', () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+    if (tapCount >= 3) { tapCount = 0; openConfig(); }
+  });
+
+  function openConfig() {
+    inputHost.value = SERVER_HOST;
+    inputPort.value = SERVER_PORT;
+    configPanel.classList.add('open');
+    inputHost.focus();
+  }
+
+  document.getElementById('btn-save-config').addEventListener('click', () => {
+    SERVER_HOST = inputHost.value.trim() || 'localhost';
+    SERVER_PORT = parseInt(inputPort.value) || 5000;
+    serverUrlSpan.textContent = `${SERVER_HOST}:${SERVER_PORT}`;
+    configPanel.classList.remove('open');
+    showToast(`🔧 Conectando a ${SERVER_HOST}:${SERVER_PORT}`);
+    checkStatus();
+  });
+
+  document.getElementById('btn-close-config').addEventListener('click', () => {
+    configPanel.classList.remove('open');
+  });
+
+  /* Cerrar con Escape */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') configPanel.classList.remove('open');
+  });
+
+  /* ── Verificar estado del servidor al cargar ──────────────────────── */
+  async function checkStatus() {
+    try {
+      const res  = await fetch(getUrl('/status'), { signal: AbortSignal.timeout(3000) });
+      const data = await res.json();
+      setStatus('ok', `✅ Conectado · Bittle ${data.bittle_ip}`);
+    } catch {
+      setStatus('error', '🔌 Servidor no encontrado');
+    }
+  }
+
+  /* ── Fondo decorativo generativo ───────────────────────────────────── */
+  (function generateBackground() {
+    const bg     = document.getElementById('bg-shapes');
+    const colors = ['#FFD93D','#FF6B35','#FF6FA8','#6BCB77','#4D96FF','#C77DFF'];
+    const stars  = ['⭐','🌟','✨','💫','🌈','❤️','🎈'];
+
+    for (let i = 0; i < 18; i++) {
+      const dot   = document.createElement('div');
+      dot.className = 'dot';
+      const size  = 40 + Math.random() * 120;
+      dot.style.cssText = `
+        width: ${size}px; height: ${size}px;
+        background: ${colors[i % colors.length]};
+        left: ${Math.random() * 100}%;
+        top:  ${Math.random() * 100}%;
+        animation-duration: ${4 + Math.random() * 6}s;
+        animation-delay:    ${Math.random() * 4}s;
+      `;
+      bg.appendChild(dot);
+    }
+
+    for (let i = 0; i < 10; i++) {
+      const star  = document.createElement('div');
+      star.className = 'star';
+      star.textContent = stars[Math.floor(Math.random() * stars.length)];
+      star.style.cssText = `
+        left: ${Math.random() * 100}%;
+        top:  ${Math.random() * 100}%;
+        font-size: ${2 + Math.random() * 3}rem;
+        animation-duration: ${5 + Math.random() * 7}s;
+        animation-delay:    ${Math.random() * 5}s;
+      `;
+      bg.appendChild(star);
+    }
+  })();
+
+  /* Verificar conexión al iniciar */
+  window.addEventListener('load', checkStatus);
+</script>
+</body>
+</html>

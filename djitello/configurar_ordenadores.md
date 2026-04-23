@@ -6,8 +6,8 @@
 # exit
 # sudo apt update
 # sudo apt install python3-venv
-# python3 -m venv venv
-# source env/bin/activate
+# python3 -m venv .venv
+# source .venv/bin/activate
 # pip install djitellopy
 # pyhton3 dron.py
 
@@ -17,20 +17,11 @@
 
 
 ## para Windows:
-1. Install python with all main libraries
-sudo apt install python3-full
-
-2. Install pip:
-sudo apt install python3-pip.
-
-3. Install venv (if not already installed):
-sudo apt install python3-venv.
-
-4. Crete our own folder for the project
+1. Crete our own folder for the project
 mkdir miCarpeta
 
-5. Create the virtual environment:
-python3 -m venv miCarpeta
+2. Create the virtual environment:
+python3 -m venv .venv
 
-6. Activate the environment:
-source miCarpeta/bin/activate
+3. Activate the environment:
+.\.venv\Scripts\activate.bat
