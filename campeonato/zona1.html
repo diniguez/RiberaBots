@@ -486,14 +486,14 @@ for (let i = 0; i < NUM_BARS; i++) {
 // Maps raw analyzer values (0-255) to perceptual dB (60-120)
 // Uses logarithmic mapping since dB is already logarithmic
 function rawToDb(raw) {
-  if (raw <= 0) return 60;
-  // raw 0-255 → dB 60-120
+  if (raw <= 0) return 40;
+  // raw 0-255 → dB 0-120
   // We use log mapping: dBperceived feels linear to us but underlying
   // energy ratio is log. We map so small sound → 60dB, loud → 120dB
   const normalized = raw / 255; // 0-1
   // Apply sqrt to emphasize lower values (mic preamp dynamics)
   const curved = Math.pow(normalized, 0.5);
-  return Math.round(60 + curved * 60);
+  return Math.round(curved * 120);
 }
 
 // Needle position: 60→0%, 120→100% linear in dB space
@@ -505,14 +505,10 @@ function dbToNeedlePercent(db) {
 // <65: silent, 65-75: murmur, 75-85: normal, 85-95: excited, 95-105: yelling, 105-115: screaming, >115: EPIC
 function dbToEmoji(db) {
   if (db < 65) return '😴';
-  if (db < 75) return '🙂';
   if (db < 85) return '😃';
-  if (db < 90) return '😄';
   if (db < 95) return '🤩';
-  if (db < 100) return '🥳';
-  if (db < 105) return '🗣️';
-  if (db < 110) return '📢';
-  if (db < 115) return '🔥';
+  if (db < 105) return '🥳';
+  if (db < 110) return '🔥';
   return '🤯';
 }
 
@@ -574,7 +570,7 @@ function loop() {
   }
 
   // Smooth with previous
-  const rawSmoothed = maxRaw * 0.6 + (lastDb - 60) / 60 * 255 * 0.4;
+  const rawSmoothed = maxRaw * 0.99 + (lastDb - 60) / 60 * 255 * 0.01;
   const db = rawToDb(rawSmoothed);
   lastDb = db;
 
