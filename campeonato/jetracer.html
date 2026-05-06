@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JetRacer - Zona 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  /* ─── Variables ─────────────────────────────────────────────── */
+  :root {
+    --c-bg:       #FFF9F0;
+    --c-yellow:   #FFD93D;
+    --c-orange:   #FF6B35;
+    --c-red:      #FF2D55;
+    --c-green:    #06D6A0;
+    --c-blue:     #118AB2;
+    --c-purple:   #845EC2;
+    --c-dark:     #1A1A2E;
+    --c-white:    #FFFFFF;
+
+    /* Tamaños base para 2160×3840 al 200% → viewport efectivo ~1080×1920 */
+    --btn-radius: 36px;
+    --shadow:     0 12px 40px rgba(0,0,0,0.22);
+    --shadow-pressed: 0 4px 12px rgba(0,0,0,0.20);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--c-bg);
+    font-family: 'Fredoka One', cursive;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  /* ─── Fondo con puntos ──────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: radial-gradient(circle, #e0d0ff 2px, transparent 2px);
+    background-size: 48px 48px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* ─── Vistas ─────────────────────────────────────────────────── */
+  .view {
+    position: fixed; inset: 0; z-index: 1;
+    display: flex; flex-direction: column;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .view.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.97);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     VISTA 1 – ZONA / 2
+  ═══════════════════════════════════════════════════════════════ */
+  #view1 {
+    background: linear-gradient(160deg, #FFD93D 0%, #FF6B35 100%);
+  }
+
+  #view1 .top-bar {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px 48px 24px;
+    flex-shrink: 0;
+  }
+
+  #view1 .zona-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(80px, 14vw, 160px);
+    color: var(--c-white);
+    text-shadow: 6px 8px 0 rgba(0,0,0,0.18);
+    letter-spacing: 12px;
+    line-height: 1;
+  }
+
+  #view1 .big-number {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(280px, 55vw, 700px);
+    color: var(--c-white);
+    text-shadow: 12px 16px 0 rgba(0,0,0,0.15);
+    line-height: 1;
+    padding-bottom: 48px;
+  }
+
+  /* ─── Botón cambio de vista (esquina superior derecha) ───────── */
+  .nav-btn {
+    position: absolute;
+    top: 40px; right: 40px;
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    border: none; cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px; font-weight: 900;
+    color: var(--c-dark);
+    background: var(--c-white);
+    box-shadow: var(--shadow);
+    transition: transform 0.12s, box-shadow 0.12s;
+    z-index: 10;
+  }
+  .nav-btn:active { transform: scale(0.92); box-shadow: var(--shadow-pressed); }
+  .nav-btn svg { width: 44px; height: 44px; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     VISTA 2 – CONTROL
+  ═══════════════════════════════════════════════════════════════ */
+  #view2 {
+    background: linear-gradient(160deg, #e8f4ff 0%, #d0f0ea 100%);
+    padding: 40px 36px 48px;
+    gap: 28px;
+  }
+
+  #view2 .v2-header {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    padding-top: 8px;
+  }
+
+  #view2 .v2-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(48px, 8vw, 90px);
+    color: var(--c-blue);
+    text-shadow: 4px 5px 0 rgba(0,0,0,0.10);
+    letter-spacing: 6px;
+  }
+
+  /* ─── Grilla de botones ──────────────────────────────────────── */
+  .ctrl-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 28px;
+  }
+
+  /* Posición de cada botón en la grilla 3×3 */
+  .btn-fwd-left   { grid-column: 1; grid-row: 1; }
+  .btn-forward    { grid-column: 2; grid-row: 1; }
+  .btn-fwd-right  { grid-column: 3; grid-row: 1; }
+  .btn-stop       { grid-column: 2; grid-row: 2; }
+  .btn-bwd-left   { grid-column: 1; grid-row: 3; }
+  .btn-backward   { grid-column: 2; grid-row: 3; }
+  .btn-bwd-right  { grid-column: 3; grid-row: 3; }
+
+  /* ─── Botón de control base ──────────────────────────────────── */
+  .ctrl-btn {
+    border: none; cursor: pointer;
+    border-radius: var(--btn-radius);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px;
+    padding: 20px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: clamp(18px, 2.8vw, 32px);
+    color: var(--c-white);
+    box-shadow: var(--shadow);
+    transition: transform 0.10s, box-shadow 0.10s, filter 0.10s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Efecto "carton" con borde inferior grueso */
+  .ctrl-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 8px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 0 0 var(--btn-radius) var(--btn-radius);
+  }
+
+  .ctrl-btn:active {
+    transform: scale(0.93) translateY(4px);
+    box-shadow: var(--shadow-pressed);
+    filter: brightness(0.9);
+  }
+
+  .ctrl-btn svg { width: 72px; height: 72px; flex-shrink: 0; }
+  .ctrl-btn span { line-height: 1.1; text-align: center; }
+
+  /* ─── Colores por acción ─────────────────────────────────────── */
+  .btn-forward    { background: linear-gradient(135deg, #06D6A0, #04a37a); }
+  .btn-backward   { background: linear-gradient(135deg, #118AB2, #0c6a88); }
+  .btn-stop       { background: linear-gradient(135deg, #FF2D55, #c01f3f); }
+  .btn-fwd-left   { background: linear-gradient(135deg, #FFD93D, #e6b800); }
+  .btn-fwd-right  { background: linear-gradient(135deg, #FF6B35, #d4511e); }
+  .btn-bwd-left   { background: linear-gradient(135deg, #845EC2, #633d99); }
+  .btn-bwd-right  { background: linear-gradient(135deg, #FF9671, #d96a47); }
+
+  /* ─── Estado de conexión ─────────────────────────────────────── */
+  .status-bar {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px; font-weight: 700;
+    color: var(--c-dark);
+    opacity: 0.6;
+  }
+  .status-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #ccc;
+    transition: background 0.4s;
+  }
+  .status-dot.ok  { background: var(--c-green); }
+  .status-dot.err { background: var(--c-red); }
+
+  /* ─── Feedback visual al pulsar ──────────────────────────────── */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.45);
+    transform: scale(0);
+    animation: ripple-anim 0.5s linear;
+    pointer-events: none;
+  }
+  @keyframes ripple-anim {
+    to { transform: scale(5); opacity: 0; }
+  }
+
+  /* ─── Estrellas decorativas flotantes ────────────────────────── */
+  .deco {
+    position: fixed; pointer-events: none; z-index: 0;
+    font-size: 48px;
+    animation: float 4s ease-in-out infinite;
+  }
+  .deco:nth-child(1) { top:  5%; left:  3%; animation-delay: 0s;   }
+  .deco:nth-child(2) { top: 12%; right: 4%; animation-delay: 1.2s; }
+  .deco:nth-child(3) { bottom: 8%; left: 5%; animation-delay: 2.1s; }
+  .deco:nth-child(4) { bottom:14%; right:3%; animation-delay: 0.7s; }
+  @keyframes float {
+    0%,100% { transform: translateY(0) rotate(-8deg); }
+    50%      { transform: translateY(-24px) rotate(8deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Decoraciones flotantes -->
+<div class="deco">⭐</div>
+<div class="deco">🎮</div>
+<div class="deco">🚀</div>
+<div class="deco">✨</div>
+
+<!-- ═══════════════════════════ VISTA 1 ═══════════════════════════ -->
+<div id="view1" class="view">
+  <div class="top-bar">
+    <span class="zona-text">ZONA</span>
+    <!-- Botón ir a control -->
+    <button class="nav-btn" onclick="goTo(2)" aria-label="Panel de control">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+      </svg>
+      CTRL
+    </button>
+  </div>
+  <div class="big-number">2</div>
+</div>
+
+<!-- ═══════════════════════════ VISTA 2 ═══════════════════════════ -->
+<div id="view2" class="view hidden">
+  <div class="v2-header">
+    <span class="v2-title">🤖 CONTROL</span>
+    <!-- Botón volver -->
+    <button class="nav-btn" onclick="goTo(1)" aria-label="Volver a Zona 2" style="background:var(--c-orange);color:#fff;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      ZONA
+    </button>
+  </div>
+
+  <!-- Grilla de botones de movimiento -->
+  <div class="ctrl-grid">
+
+    <!-- Adelante izquierda -->
+    <button class="ctrl-btn btn-fwd-left" data-cmd="forward_left" aria-label="Adelante izquierda">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-left" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M2 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H3.707l10.147 10.146a.5.5 0 0 1-.708.708L3 3.707V8.5a.5.5 0 0 1-1 0z"/>
+      </svg>
+      <span>ADELANTE<br>IZQUIERDA</span>
+    </button>
+
+    <!-- Adelante recto -->
+    <button class="ctrl-btn btn-forward" data-cmd="forward" aria-label="Adelante recto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+      </svg>
+      <span>ADELANTE</span>
+    </button>
+
+    <!-- Adelante derecha -->
+    <button class="ctrl-btn btn-fwd-right" data-cmd="forward_right" aria-label="Adelante derecha">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-right" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z"/>
+      </svg>
+      <span>ADELANTE<br>DERECHA</span>
+    </button>
+
+    <!-- STOP (centro) -->
+    <button class="ctrl-btn btn-stop" data-cmd="stop" aria-label="Stop">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <rect x="4" y="4" width="16" height="16" rx="3"/>
+      </svg>
+      <span>STOP</span>
+    </button>
+
+    <!-- Atrás izquierda -->
+    <button class="ctrl-btn btn-bwd-left" data-cmd="backward_left" aria-label="Atrás izquierda">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-left" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M2 13.5a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 0-1H3.707L13.854 2.854a.5.5 0 0 0-.708-.708L3 12.293V7.5a.5.5 0 0 0-1 0z"/>
+      </svg>
+      <span>ATRÁS<br>IZQUIERDA</span>
+    </button>
+
+    <!-- Atrás recto -->
+    <button class="ctrl-btn btn-backward" data-cmd="backward" aria-label="Atrás recto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/>
+      </svg>
+      <span>ATRÁS</span>
+    </button>
+
+    <!-- Atrás derecha -->
+    <button class="ctrl-btn btn-bwd-right" data-cmd="backward_right" aria-label="Atrás derecha">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-right" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M14 13.5a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1 0-1h4.793L2.146 2.854a.5.5 0 1 1 .708-.708L13 12.293V7.5a.5.5 0 0 1 1 0z"/>
+      </svg>
+      <span>ATRÁS<br>DERECHA</span>
+    </button>
+
+  </div>
+
+  <!-- Barra de estado de conexión -->
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Conectando…</span>
+  </div>
+</div>
+
+<script>
+  // ── Configuración del servidor ─────────────────────────────────
+  // Cambia esta IP por la IP WiFi del JetRacer
+  var SERVER_URL = 'http://192.168.50.23:8080';
+
+  // ── Navegación entre vistas ────────────────────────────────────
+  function goTo(n) {
+    document.getElementById('view1').classList.toggle('hidden', n !== 1);
+    document.getElementById('view2').classList.toggle('hidden', n !== 2);
+  }
+
+  // ── Efecto ripple ──────────────────────────────────────────────
+  function addRipple(btn, e) {
+    var r = document.createElement('span');
+    r.className = 'ripple';
+    var rect = btn.getBoundingClientRect();
+    var x = (e.clientX || (e.touches && e.touches[0].clientX) || rect.left + rect.width/2) - rect.left - 40;
+    var y = (e.clientY || (e.touches && e.touches[0].clientY) || rect.top + rect.height/2) - rect.top - 40;
+    r.style.left = x + 'px';
+    r.style.top  = y + 'px';
+    btn.appendChild(r);
+    setTimeout(function() { r.parentNode && r.parentNode.removeChild(r); }, 500);
+  }
+
+  // ── Estado de conexión ─────────────────────────────────────────
+  var dot  = document.getElementById('statusDot');
+  var stxt = document.getElementById('statusText');
+
+  function setStatus(ok, msg) {
+    dot.className = 'status-dot ' + (ok ? 'ok' : 'err');
+    stxt.textContent = msg;
+  }
+
+  // Ping de estado cada 5s
+  function pingStatus() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', SERVER_URL + '/status', true);
+    xhr.timeout = 3000;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var d = JSON.parse(xhr.responseText);
+          setStatus(true, 'Robot conectado ' + (d.ros ? '(ROS ✓)' : '(simulación)'));
+        } catch(e) { setStatus(true, 'Robot conectado'); }
+      } else {
+        setStatus(false, 'Error servidor: ' + xhr.status);
+      }
+    };
+    xhr.onerror   = function() { setStatus(false, 'Sin conexión con el robot'); };
+    xhr.ontimeout = function() { setStatus(false, 'Tiempo de espera agotado'); };
+    xhr.send();
+  }
+  pingStatus();
+  setInterval(pingStatus, 5000);
+
+  // ── Envío de comandos ──────────────────────────────────────────
+  function sendCommand(cmd) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', SERVER_URL + '/command', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.timeout = 2000;
+    xhr.onload = function() {
+      if (xhr.status !== 200) {
+        setStatus(false, 'Error: ' + xhr.status);
+      }
+    };
+    xhr.onerror = function() { setStatus(false, 'Error enviando comando'); };
+    xhr.send(JSON.stringify({ command: cmd }));
+  }
+
+  // ── Vincular botones de control ────────────────────────────────
+  var ctrlBtns = document.querySelectorAll('.ctrl-btn');
+  for (var i = 0; i < ctrlBtns.length; i++) {
+    (function(btn) {
+      var cmd = btn.getAttribute('data-cmd');
+
+      // Touch start → enviar comando
+      btn.addEventListener('touchstart', function(e) {
+        addRipple(btn, e);
+        sendCommand(cmd);
+      }, { passive: true });
+
+      // Click (ratón / fallback)
+      btn.addEventListener('click', function(e) {
+        addRipple(btn, e);
+        sendCommand(cmd);
+      });
+    })(ctrlBtns[i]);
+  }
+
+  // Stop de seguridad si se levanta el dedo (solo para forward/backward continuos)
+  document.addEventListener('touchend', function() {
+    // Descomentar la siguiente línea para detener el robot al soltar el dedo:
+    // sendCommand('stop');
+  });
+</script>
+</body>
+</html>

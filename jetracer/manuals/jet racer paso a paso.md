@@ -1,3 +1,7 @@
+# Windows create virtual environment
+py -m venv .venv
+.venv\Scripts\activate
+
 # Install VMWare on Linux:
 # get the file VMware-Workstation-Full-17.6.4-24832109.x86_64.bundle
 # give execution permission

@@ -3,16 +3,8 @@
 """
 JetRacer Robot Control Server
 Compatible con Python 2.7.17
-Recibe comandos HTTP desde la pagina web y los envia al robot JetRacer
-via puerto serie /dev/ttyACM0 usando la libreria pySerial.
-
-Protocolo serial: cadena ASCII  "T<throttle>,S<steering>\n"
-  Ejemplo: "T0.30,S0.00\n"  ->  adelante recto
-  Ajusta el formato en RobotController.build_packet() si tu firmware
-  espera otro protocolo.
-
-Instalacion de pySerial en Python 2.7:
-  pip install pyserial
+Recibe comandos HTTP desde la pagina web y los publica como mensajes ROS
+al robot JetRacer Jetson Nano AI Kit via WiFi.
 """
 
 from __future__ import print_function
@@ -21,101 +13,44 @@ import threading
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from SocketServer import ThreadingMixIn
 
-try:
-    import serial
-    SERIAL_LIB = True
-except ImportError:
-    SERIAL_LIB = False
-    print("[WARN] pyserial no encontrado. Instala con: pip install pyserial")
-
 # ── Configuracion ──────────────────────────────────────────────────────────────
-HOST         = '0.0.0.0'
-PORT         = 8080
-SERIAL_PORT  = '/dev/ttyACM0'
-SERIAL_BAUD  = 115200
-SERIAL_TIMEOUT = 1
+HOST = '0.0.0.0'
+PORT = 8080
 
 # Velocidades (ajustar segun el robot)
-THROTTLE_FWD   =  0.30   # aceleracion hacia delante
-THROTTLE_BACK  = -0.30   # aceleracion hacia atras
-STEERING_LEFT  =  0.40   # angulo izquierda
-STEERING_RIGHT = -0.40   # angulo derecha
-STEERING_STR   =  0.00   # recto
+THROTTLE_FWD  =  0.3   # aceleracion hacia delante
+THROTTLE_BACK = -0.3   # aceleracion hacia atras
+STEERING_LEFT = -0.4   # angulo izquierda
+STEERING_RIGHT =  0.4  # angulo derecha
+STEERING_STR  =  0.0   # recto
 
-# ── Controlador Serial ─────────────────────────────────────────────────────────
+# Intenta importar rospy; si no esta disponible corre en modo simulacion
+try:
+    import rospy
+    from std_msgs.msg import Float32
+    ROS_AVAILABLE = True
+except ImportError:
+    ROS_AVAILABLE = False
+    print("[WARN] rospy no encontrado. Ejecutando en modo simulacion (sin ROS).")
+
+# ── ROS Publisher ──────────────────────────────────────────────────────────────
 class RobotController(object):
-
     def __init__(self):
         self.throttle = 0.0
         self.steering = 0.0
-        self._lock = threading.Lock()
-        self._serial = None
-        self._connect()
-
-    def _connect(self):
-        if not SERIAL_LIB:
-            print("[SERIAL] pyserial no disponible. Modo simulacion activado.")
-            return
-        try:
-            self._serial = serial.Serial(SERIAL_PORT, SERIAL_BAUD, timeout=SERIAL_TIMEOUT)
-            print("[SERIAL] Puerto {} abierto a {} baudios.".format(SERIAL_PORT, SERIAL_BAUD))
-        except serial.SerialException as e:
-            self._serial = None
-            print("[SERIAL] No se pudo abrir {}: {}".format(SERIAL_PORT, e))
-            print("[SERIAL] Ejecutando en modo simulacion.")
-
-    @property
-    def connected(self):
-        return self._serial is not None and self._serial.isOpen()
-    
-    def checksum(self, data):
-        return sum(data) & 0xFF
-
-    def build_packet(self, throttle, steering):
-        """
-        Construye el paquete de bytes a enviar por el puerto serie.
-
-        Formato por defecto: "T<throttle>,S<steering>\n"
-          Ejemplo: b"T0.30,S-0.40\n"
-
-        *** MODIFICA ESTA FUNCION si tu firmware usa otro protocolo ***
-        Por ejemplo, si espera bytes crudos tipo struct:
-          import struct
-          return struct.pack('!ff', throttle, steering)
-        """
-        tmp = bytearray(11)
-        tmp[0] = 0xAA; tmp[1] = 0x55
-        tmp[2] = 0x0B; tmp[3] = 0x11
-        x   = int(throttle * 1000)
-        yaw = int(steering * 1000)
-        tmp[4] = (x   >> 8) & 0xFF; tmp[5] = x   & 0xFF
-        tmp[6] = (x   >> 8) & 0xFF; tmp[7] = x   & 0xFF
-        tmp[8] = (yaw >> 8) & 0xFF; tmp[9] = yaw & 0xFF
-        tmp[10] = self.checksum(tmp[:10])
-        
-        return tmp
+        if ROS_AVAILABLE:
+            rospy.init_node('jetracer_web_controller', anonymous=True)
+            self.pub_throttle = rospy.Publisher('/jetracer/throttle', Float32, queue_size=1)
+            self.pub_steering = rospy.Publisher('/jetracer/steering', Float32, queue_size=1)
+            print("[ROS] Nodo inicializado. Publicando en /jetracer/throttle y /jetracer/steering")
 
     def send(self, throttle, steering):
         self.throttle = throttle
         self.steering = steering
-        tmp = self.build_packet(throttle, steering)
-        with self._lock:
-            if self.connected:
-                try:
-                    self._serial.write(bytes(tmp))
-                    self._serial.flush()
-                    print("[CMD] Enviado: {}".format(tmp.strip()))
-                except serial.SerialException as e:
-                    print("[SERIAL] Error al escribir: {}".format(e))
-                    self._serial = None   # marca como desconectado
-            else:
-                print("[SIM] throttle={:.2f}  steering={:.2f}".format(throttle, steering))
-
-    def close(self):
-        with self._lock:
-            if self.connected:
-                self._serial.close()
-                print("[SERIAL] Puerto cerrado.")
+        if ROS_AVAILABLE:
+            self.pub_throttle.publish(Float32(throttle))
+            self.pub_steering.publish(Float32(steering))
+        print("[CMD] throttle={:.2f}  steering={:.2f}".format(throttle, steering))
 
 # Instancia global del controlador
 robot = RobotController()
@@ -155,11 +90,10 @@ class CommandHandler(BaseHTTPRequestHandler):
         if self.path == '/status':
             self._set_headers(200)
             body = json.dumps({
-                'status':    'ok',
-                'serial':    robot.connected,
-                'port':      SERIAL_PORT,
-                'throttle':  robot.throttle,
-                'steering':  robot.steering,
+                'status': 'ok',
+                'ros': ROS_AVAILABLE,
+                'throttle': robot.throttle,
+                'steering': robot.steering,
             })
             self.wfile.write(body.encode('utf-8'))
         else:
@@ -201,18 +135,16 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 if __name__ == '__main__':
     server = ThreadedHTTPServer((HOST, PORT), CommandHandler)
     print("=" * 60)
-    print("  JetRacer Web Controller Server  (Serial)")
+    print("  JetRacer Web Controller Server")
     print("  Escuchando en http://{}:{}".format(HOST, PORT))
-    print("  Puerto serie : {}  ({} baudios)".format(SERIAL_PORT, SERIAL_BAUD))
-    print("  Conectado    : {}".format(robot.connected))
+    print("  ROS disponible: {}".format(ROS_AVAILABLE))
     print("  Endpoints:")
-    print("    GET  /status   -> estado del robot")
-    print("    POST /command  -> JSON {command: '...'}")
+    print("    GET  /status       -> estado actual del robot")
+    print("    POST /command      -> enviar comando (JSON: {command: '...'} )")
     print("  Comandos validos: {}".format(', '.join(COMMANDS.keys())))
     print("=" * 60)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\n[INFO] Servidor detenido.")
-        robot.send(0.0, 0.0)   # Seguridad: detener robot al cerrar
-        robot.close()
+        robot.send(0.0, 0.0)  # Seguridad: detener robot al cerrar
