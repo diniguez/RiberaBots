@@ -137,7 +137,8 @@ def _init_tello():
 
 @app.route("/takeoff",  methods=["POST"])
 def route_takeoff():
-    return jsonify(tello.takeoff())
+    jsonify(tello.takeoff())
+    return jsonify(tello.move_up(100))
 
 @app.route("/land",     methods=["POST"])
 def route_land():
