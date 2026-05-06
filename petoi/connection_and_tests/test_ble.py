@@ -10,12 +10,17 @@ async def main():
     
     comandos = [
         b'ksit\n',
+        b'kpee\n',
+        b'ksit\n'
+        ]
+
+    correctos = [
+        b'ksit\n',
         b'kstand\n',
         b'kup\n',
         b'kpee\n',
         b'kck\n',
         b'khi\n',
-        b'kvtF\n',
         b'kwkF\n',
         b'kwkL\n',
         b'ksit\n',

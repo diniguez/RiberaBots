@@ -1,6 +1,6 @@
 # Configurar Jetson ROS AI KIT para hacer login y conectarse directamente a la wifi MerIA:
-sudo nmcli connection modify MerIA connection.autoconnect yes
-sudo nmcli connection modify MerIA connection.permissions ""
+sudo nmcli connection modify RiberaBots-1 connection.autoconnect yes
+sudo nmcli connection modify RiberaBots-1 connection.permissions ""
 
 sudo nano /etc/gdm3/custom.conf
 Encontrar las líneas # AutomaticLoginEnable = true and # AutomaticLogin = user1.
