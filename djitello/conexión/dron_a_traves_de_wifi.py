@@ -2,8 +2,8 @@ from djitellopy import Tello
 import time
 
 # Datos de tu red Wi-Fi
-SSID = 'MerIA_Drones'
-PASSWORD = 'campeonatoriberabots26*'
+SSID = 'RiberaBots-1_IoT'
+PASSWORD = 'campeonato'
 
 # Crear instancia del dron
 tello = Tello()
