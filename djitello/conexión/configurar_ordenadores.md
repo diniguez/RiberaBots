@@ -13,7 +13,9 @@
 
 # en lo sucesivo:
 # source env/bin/activate
+source /home/david/003.CODE/MERiA/petoi/.venv/bin/activate
 # pyhton3 dron.py
+python3.1 djitello/basicos/despegue_aterrizaje.py 
 
 
 ## para Windows:
