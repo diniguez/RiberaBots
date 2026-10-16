@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONA 3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Fredoka One', 'Comic Sans MS', cursive;
+    background: #fff9c4;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, #ffb3c1 4px, transparent 4px),
+      radial-gradient(circle, #b3e5fc 4px, transparent 4px),
+      radial-gradient(circle, #c8e6c9 4px, transparent 4px);
+    background-size: 120px 120px, 180px 180px, 150px 150px;
+    background-position: 0 0, 60px 60px, 30px 90px;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    padding: 18px 0 14px;
+    text-align: center;
+    border-bottom: 6px dashed #fff;
+    box-shadow: 0 6px 0 #e04e4e;
+  }
+
+  .zona-text {
+    font-size: clamp(52px, 11vw, 100px);
+    color: #fff;
+    letter-spacing: 14px;
+    text-shadow: 4px 4px 0 #c0392b, 6px 6px 0 rgba(0,0,0,0.15);
+    animation: wobble 2.5s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  @keyframes wobble {
+    0%,100% { transform: rotate(-2deg) scale(1); }
+    50%      { transform: rotate(2deg)  scale(1.04); }
+  }
+
+  .stars {
+    display: inline-flex;
+    gap: 8px;
+    margin: 0 16px;
+    vertical-align: middle;
+    font-size: 28px;
+  }
+  .star { display: inline-block; animation: spin-star 3s linear infinite; }
+  .star:nth-child(2) { animation-direction: reverse; animation-duration: 2s; }
+  @keyframes spin-star {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ── NUMBER ── */
+  .number-area {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .big-number {
+    font-size: clamp(260px, 52vw, 580px);
+    line-height: 1;
+    color: #ff6b6b;
+    text-shadow:
+      8px  8px  0 #e04e4e,
+      16px 16px 0 #c0392b,
+      -4px -4px 0 rgba(255,255,255,0.9);
+    animation: pulse-num 1.8s ease-in-out infinite;
+    user-select: none;
+    cursor: default;
+  }
+
+  @keyframes pulse-num {
+    0%,100% { transform: scale(1)    rotate(-1deg); }
+    50%      { transform: scale(1.05) rotate(1deg); }
+  }
+
+  /* ── CLOUDS ── */
+  .cloud {
+    position: fixed;
+    z-index: 0;
+    opacity: 0.55;
+    pointer-events: none;
+    font-size: 80px;
+    animation: float-cloud linear infinite;
+  }
+  .cloud-1 { top: 12%; left: -120px; animation-duration: 18s; font-size: 70px; }
+  .cloud-2 { top: 58%; right: -120px; animation-duration: 22s; animation-direction: reverse; font-size: 90px; }
+  @keyframes float-cloud {
+    from { transform: translateX(0); }
+    to   { transform: translateX(calc(100vw + 200px)); }
+  }
+
+  /* ── BOTTOM EMOJIS ── */
+  .bounce-emoji {
+    position: fixed;
+    font-size: 44px;
+    z-index: 2;
+    pointer-events: none;
+    animation: bounce-up 4s ease-in-out infinite;
+  }
+  .b1 { bottom: 28px; left: 24px;   animation-delay: 0s; }
+  .b2 { bottom: 28px; right: 24px;  animation-delay: 0.9s; }
+  .b3 { bottom: 28px; left: calc(50% - 22px); animation-delay: 1.8s; }
+  @keyframes bounce-up {
+    0%,100% { transform: translateY(0)   rotate(0deg);  }
+    50%      { transform: translateY(-28px) rotate(14deg); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="cloud cloud-1">☁️</div>
+  <div class="cloud cloud-2">☁️</div>
+
+  <div class="top-bar">
+    <span class="stars">
+      <span class="star">⭐</span>
+      <span class="star">🌟</span>
+    </span>
+    <span class="zona-text">ZONA</span>
+    <span class="stars">
+      <span class="star">🌟</span>
+      <span class="star">⭐</span>
+    </span>
+  </div>
+
+  <div class="number-area">
+    <div class="big-number">3</div>
+  </div>
+
+  <div class="bounce-emoji b1">🎈</div>
+  <div class="bounce-emoji b2">🎉</div>
+  <div class="bounce-emoji b3">🎊</div>
+
+</body>
+</html>
