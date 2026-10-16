@@ -16,3 +16,6 @@ python3 -m venv .venv   (or python3.10)
 # restart user session (close and open WSL terminal)
 cd $folderOfTheRobot
 .\.venv\Scripts\activate.bat
+
+# launch code
+python3 .\$code.py$
