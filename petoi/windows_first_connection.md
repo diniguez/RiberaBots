@@ -42,8 +42,8 @@ sudo apt install curl
 curl -sS https://bootstrap.pypa.io/get-pip.py | sudo /usr/bin/python3.10
 
 # create and work into the virtual environment
-python3.10 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv   (or python3.10)
+.\.venv\Scripts\activate.bat
 
 # add libraries
 pip install pyserial
@@ -72,7 +72,7 @@ exit
 
 # restart user session (close and open WSL terminal)
 cd $folderOfPetoi
-source .venv/bin/activate
+.\.venv\Scripts\activate.bat
 
 # run the code
 python3.10 voice_control_pc.py
